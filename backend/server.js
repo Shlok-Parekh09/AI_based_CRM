@@ -63,7 +63,7 @@ function lookupCompany(companyName) {
 
 // ── POST /api/agent/prospect ─────────────────────────────
 app.post("/api/agent/prospect", async (req, res) => {
-  const { companyName, city, companySize, type } = req.body;
+  const { companyName, city, companySize, type, owner } = req.body;
 
   if (!companyName) {
     return res.status(400).json({ error: "companyName is required." });
@@ -71,6 +71,11 @@ app.post("/api/agent/prospect", async (req, res) => {
 
   // Step 1: Enrich with mock data
   const enriched = lookupCompany(companyName);
+
+  // Override mock key_contact dynamically with the user's input
+  if (owner && owner.trim() !== "" && owner.trim() !== "No owner") {
+    enriched.key_contact = { name: owner.trim(), title: "Company Contact" };
+  }
 
   // Step 2: Build the LLM prompt
   const systemPrompt = `You are a world-class B2B Sales Prospecting Agent for CustBuds CRM.

@@ -34,12 +34,15 @@ function AgentResultPanel({ result, onClose }: { result: AgentResult; onClose: (
     const scoreColor = result.fitScore >= 80 ? "#22c55e" : result.fitScore >= 60 ? "#f59e0b" : "#ef4444";
     const scoreBg   = result.fitScore >= 80 ? "#f0fdf4" : result.fitScore >= 60 ? "#fffbeb" : "#fef2f2";
 
-    const activeBody = result[activeEmail];
-    const [subject, ...bodyLines] = activeBody.split("\n");
-    const body = bodyLines.join("\n").trim();
+    const rawBody = (result[activeEmail] || "").trim();
+    const lines = rawBody.split("\n").map(l => l.trim()).filter(l => l !== "");
+    let subject = lines.length > 0 ? lines[0] : "New Email";
+    // Clean up "Subject:" prefix if the AI included it
+    subject = subject.replace(/^subject:\s*/i, "");
+    const body = lines.length > 1 ? lines.slice(1).join("\n\n") : rawBody;
 
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(activeBody).then(() => {
+        navigator.clipboard.writeText(rawBody).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         });
@@ -317,10 +320,11 @@ function EditableCell({ value, onChange, className = "", link = false }: {
 }
 
 /* ───────── Create Company Modal ───────── */
-function CreateCompanyModal({ onClose, onSave, onAgentResult }: {
+function CreateCompanyModal({ onClose, onSave, onAgentStart, onAgentResult }: {
     onClose: () => void;
     onSave: (form: any) => void;
-    onAgentResult?: (result: AgentResult) => void;
+    onAgentStart?: () => void;
+    onAgentResult?: (result: AgentResult | null) => void;
 }) {
     const [form, setForm] = useState({
         domain: "",
@@ -480,7 +484,8 @@ function CreateCompanyModal({ onClose, onSave, onAgentResult }: {
                             onSave(form);
                             onClose();
                             // 2. Fire the Prospecting Agent in the background
-                            if (onAgentResult) {
+                            if (onAgentStart && onAgentResult) {
+                                onAgentStart(); // shows loading banner
                                 try {
                                     const res = await fetch("http://localhost:5000/api/agent/prospect", {
                                         method: "POST",
@@ -490,20 +495,17 @@ function CreateCompanyModal({ onClose, onSave, onAgentResult }: {
                                             city: form.city,
                                             companySize: form.companySize,
                                             type: form.type,
+                                            owner: form.owner,
                                         }),
                                     });
                                     if (!res.ok) throw new Error(await res.text());
                                     const data: AgentResult = await res.json();
                                     data.companyName = form.name || form.domain;
-                                    // Log individual fields for easy debugging:
-                                    console.log("🎯 fitScore:", data.fitScore);
-                                    console.log("📝 scoreReasoning:", data.scoreReasoning);
-                                    console.log("📧 email1:", data.email1);
-                                    console.log("📧 email2:", data.email2);
-                                    console.log("🏢 enrichedProfile:", data.enrichedProfile);
                                     onAgentResult(data);
                                 } catch (err) {
                                     console.error("Agent error:", err);
+                                    alert("Could not reach the Prospecting Agent. Make sure 'npm start' is running in the backend folder on port 5000, and your Groq API key is valid.");
+                                    onAgentResult(null); // clears loading banner
                                 }
                             }
                         }}
@@ -903,7 +905,7 @@ function ContactsView() {
 }
 
 /* ───────── Companies View ───────── */
-function CompaniesView({ onAgentResult }: { onAgentResult?: (r: AgentResult) => void }) {
+function CompaniesView({ onAgentStart, onAgentResult }: { onAgentStart?: () => void, onAgentResult?: (r: AgentResult | null) => void }) {
     const [activeTab, setActiveTab] = useState("all");
     const [tableSearch, setTableSearch] = useState("");
     const [showAddMenu, setShowAddMenu] = useState(false);
@@ -982,7 +984,7 @@ function CompaniesView({ onAgentResult }: { onAgentResult?: (r: AgentResult) => 
 
     return (
         <>
-            {showCreateModal && <CreateCompanyModal onClose={() => setShowCreateModal(false)} onSave={handleSaveNew} onAgentResult={onAgentResult} />}
+            {showCreateModal && <CreateCompanyModal onClose={() => setShowCreateModal(false)} onSave={handleSaveNew} onAgentStart={onAgentStart} onAgentResult={onAgentResult} />}
             {showImport && <ImportModal columns={columns} onClose={() => setShowImport(false)} onImport={handleImport} />}
             {/* Note: CompaniesView passes onAgentResult through the dashboard — see CRMDashboard */}
 
@@ -1800,18 +1802,20 @@ export default function CRMDashboard() {
      *     -> CompaniesView passes it up to this handler
      *     -> we store it in state -> AgentResultPanel renders
      */
-    const handleAgentResult = (result: AgentResult) => {
+    const handleAgentResult = (result: AgentResult | null) => {
         setIsProspecting(false);
-        setAgentResult(result);
-        // Switch to companies view so the user sees the result right away
-        setActiveNav("companies");
+        if (result) {
+            setAgentResult(result);
+            // Switch to companies view so the user sees the result right away
+            setActiveNav("companies");
+        }
     };
 
     // Show loading indicator immediately when the user submits the modal
-    const handleAgentStart = (result: AgentResult) => {
+    const handleAgentStart = () => {
         setIsProspecting(true);
         setAgentResult(null);
-        handleAgentResult(result);
+        setActiveNav("companies");
     };
 
     const crmNav = [
@@ -1950,12 +1954,12 @@ export default function CRMDashboard() {
                         )}
 
                         {activeNav === "contacts" ? <ContactsView /> :
-                         activeNav === "companies" ? <CompaniesView onAgentResult={handleAgentStart} /> :
+                         activeNav === "companies" ? <CompaniesView onAgentStart={handleAgentStart} onAgentResult={handleAgentResult} /> :
                          activeNav === "prospecting" ? <ProspectingAgentView /> :
                          activeNav === "deal-intel" ? <DealIntelligenceView /> :
                          activeNav === "retention" ? <RevenueRetentionView /> :
                          activeNav === "competitive" ? <CompetitiveIntelligenceView /> :
-                         <CompaniesView onAgentResult={handleAgentStart} />}
+                         <CompaniesView onAgentStart={handleAgentStart} onAgentResult={handleAgentResult} />}
                     </div>
                 </main>
             </div>
