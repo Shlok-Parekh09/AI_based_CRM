@@ -1,6 +1,8 @@
 ﻿import React, { useState, useEffect, useRef, useMemo } from "react";
 
 // â”€â”€ TableRow type â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+import { CustBudsLogoLockup } from "./components/CustBudsLogo";
+
 type TableRow = {
     id: number;
     [key: string]: any;
@@ -95,7 +97,6 @@ type DealIntelRecord = {
     contact: string;
     activityCount: number;
     lastActivityLabel: string;
-    heatmapBars: number[];
     recovery: DealIntelRecovery | null;
     researchSummary?: string;
     companyFocus?: string;
@@ -123,11 +124,6 @@ type DealIntelModelResponse = {
     authBlocked?: boolean;
     alerts: DealIntelRemoteAlert[];
     monitor: DealIntelRemoteMonitor[];
-};
-
-type DealHeatmapRow = {
-    name: string;
-    bars: number[];
 };
 
 type EmailProviderConfig = {
@@ -593,17 +589,6 @@ const GmailIcon = () => (
         <path d="M16.5 3.375V10.5L21.75 6.75V4.5C21.75 3.1934 20.231 2.47353 19.2 3.3L16.5 5.25V3.375Z" fill="#FBBC04"/>
         <path d="M16.5 3.375L12 6L7.5 3.375V10.5L3 6.75V4.5C3 3.1934 4.51901 2.47353 5.55 3.3L7.5 5.25V3.375Z" fill="#EA4335"/>
         <path d="M16.5 5.25L12 9.5L7.5 5.25L7.5 3.375L12 6L16.5 3.375V5.25Z" fill="#C5221F"/>
-    </svg>
-);
-
-const HubSpotLogoIcon = () => (
-    <svg viewBox="0 0 32 32" className="w-7 h-7" fill="none">
-        <circle cx="16" cy="16" r="16" fill="#FF7A59" />
-        <path
-            d="M20 10.5c0-1.1-.9-2-2-2s-2 .9-2 2v5.5H10.5c-1.1 0-2 .9-2 2s.9 2 2 2H16v2c0 1.1.9 2 2 2s2-.9 2-2V10.5z"
-            fill="white"
-        />
-        <circle cx="22" cy="10" r="2.5" fill="white" />
     </svg>
 );
 
@@ -2668,14 +2653,6 @@ function DealIntelligenceView({ agentResults = [] }: { agentResults?: AgentResul
 
             health = Math.max(0, Math.min(100, Math.round(health)));
             const risk: "High" | "Medium" | "Low" = health < 50 || severeSignals >= 2 ? "High" : health < 75 || signals.length >= 2 ? "Medium" : "Low";
-            const heatmapBars = [0, 0, 0, 0, 0, 0, 0];
-            relatedActivities.forEach(row => {
-                const parsedDate = extractParsedActivityDate(row);
-                if (!parsedDate) return;
-                const daysAgo = Math.max(0, -daysBetween(parsedDate));
-                if (daysAgo <= 6) heatmapBars[6 - daysAgo] += 1;
-            });
-
             return {
                 id: deal.id,
                 name: deal.name,
@@ -2690,7 +2667,6 @@ function DealIntelligenceView({ agentResults = [] }: { agentResults?: AgentResul
                 contact: deal.contact,
                 activityCount: relatedActivities.length,
                 lastActivityLabel: formatRelativeDayLabel(lastActivity),
-                heatmapBars,
                 recovery: recoveryForDeal(categories, deal, research),
                 researchSummary: research?.researchSummary || "",
                 companyFocus: research?.publicSignals?.[0]?.detail || "",
@@ -2704,7 +2680,6 @@ function DealIntelligenceView({ agentResults = [] }: { agentResults?: AgentResul
             pipelineValue: liveDeals.reduce((sum, deal) => sum + parseDealValue(deal.value), 0),
             recoveryCount: liveDeals.filter(deal => deal.recovery).length,
             signalCount: liveDeals.reduce((sum, deal) => sum + deal.signals.length, 0),
-            heatmapRows: liveDeals.slice(0, 5).map(deal => ({ name: deal.name, bars: deal.heatmapBars })),
             alerts: liveDeals.flatMap(deal => deal.signals.slice(0, 2).map(signal => ({
                 icon: deal.risk === "High" ? "!" : deal.risk === "Medium" ? "i" : "+",
                 msg: `${deal.name}: ${signal}`,
@@ -2936,45 +2911,21 @@ function DealIntelligenceView({ agentResults = [] }: { agentResults?: AgentResul
                 )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-5">
-                    <SectionHeader title="Engagement Heatmap" description="Daily meeting and call activity captured against active deals" />
-                    {intelligence.heatmapRows.length === 0 ? (
-                        <p className="text-xs text-gray-400">Add dated meetings or calls to populate the last 7 days of activity.</p>
-                    ) : (
-                        <div className="space-y-2">
-                            {intelligence.heatmapRows.map(row => (
-                                <div key={row.name} className="flex items-center gap-3">
-                                    <span className="text-xs text-gray-600 w-36 truncate">{row.name}</span>
-                                    <div className="flex gap-1 flex-1">
-                                        {row.bars.map((v, i) => (
-                                            <div key={i} className="flex-1 rounded-sm" style={{ height: "20px", background: v === 0 ? "#f1f5f9" : `rgba(99,102,241,${0.15 + v * 0.18})` }} />
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                            <div className="flex justify-end gap-1 mt-1">
-                                {["-6d","-5d","-4d","-3d","-2d","-1d","Today"].map(day => <span key={day} className="flex-1 text-center text-xs text-gray-300">{day}</span>)}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-5">
+                <SectionHeader title="Agent Alerts" description="Latest risk signals generated from CRM activity and deal coverage" />
+                {intelligence.alerts.length === 0 ? (
+                    <p className="text-xs text-gray-400">No AI-generated alerts yet. Add live deal activity and a Mistral API key to generate alert text here.</p>
+                ) : (
+                    <div className="space-y-3">
+                        {intelligence.alerts.map((a, i) => (
+                            <div key={i} className="flex items-start gap-2">
+                                <span className={`text-sm ${a.tone === "danger" ? "text-red-500" : a.tone === "positive" ? "text-green-500" : "text-amber-500"}`}>{a.icon}</span>
+                                <span className="text-xs text-gray-700 flex-1">{a.msg}</span>
+                                <span className="text-xs text-gray-400 flex-shrink-0">{a.time}</span>
                             </div>
-                        </div>
-                    )}
-                </div>
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-5">
-                    <SectionHeader title="Agent Alerts" description="Latest risk signals generated from CRM activity and deal coverage" />
-                    {intelligence.alerts.length === 0 ? (
-                        <p className="text-xs text-gray-400">No AI-generated alerts yet. Add live deal activity and a Mistral API key to generate alert text here.</p>
-                    ) : (
-                        <div className="space-y-3">
-                            {intelligence.alerts.map((a, i) => (
-                                <div key={i} className="flex items-start gap-2">
-                                    <span className={`text-sm ${a.tone === "danger" ? "text-red-500" : a.tone === "positive" ? "text-green-500" : "text-amber-500"}`}>{a.icon}</span>
-                                    <span className="text-xs text-gray-700 flex-1">{a.msg}</span>
-                                    <span className="text-xs text-gray-400 flex-shrink-0">{a.time}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -4189,11 +4140,8 @@ export default function CRMDashboard() {
                 className="w-52 flex-shrink-0 flex flex-col"
                 style={{ background: "#0a1628" }}
             >
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
-                    <HubSpotLogoIcon />
-                    <span className="text-white font-semibold text-sm tracking-wide">
-                        CustBuds
-                    </span>
+                <div className="px-4 py-3.5 border-b border-white/10">
+                    <CustBudsLogoLockup />
                 </div>
                 <nav className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto">
                     <div className="text-xs font-semibold text-gray-500 px-3 pb-1 uppercase tracking-wider">CRM</div>

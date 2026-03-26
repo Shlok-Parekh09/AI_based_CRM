@@ -1,0 +1,21 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="custbudsBadge" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0f172a" />
+      <stop offset="0.52" stop-color="#0284c7" />
+      <stop offset="1" stop-color="#14b8a6" />
+    </linearGradient>
+    <linearGradient id="custbudsLink" x1="20" y1="38" x2="49" y2="38" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0ea5e9" />
+      <stop offset="1" stop-color="#14b8a6" />
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="url(#custbudsBadge)" />
+  <path d="M18 19C18 14.6 21.6 11 26 11H38C44.6 11 50 16.4 50 23V29C50 35.6 44.6 41 38 41H29L20 49V41H18C13.6 41 10 37.4 10 33V19C10 14.6 13.6 11 18 11Z" fill="white" fill-opacity="0.97" />
+  <circle cx="25.5" cy="23.5" r="4.75" fill="#0ea5e9" />
+  <circle cx="38.5" cy="23.5" r="4.75" fill="#14b8a6" />
+  <path d="M20.5 38C21.9 33.8 25.2 31.5 29.2 31.5C32.7 31.5 35.4 32.8 37.2 35.6C39 32.8 41.7 31.5 45.1 31.5C49 31.5 52.2 33.8 53.5 38" stroke="url(#custbudsLink)" stroke-width="3.4" stroke-linecap="round" />
+  <path d="M28.3 24.7C29.9 24.7 31.3 25.3 32.6 26.6C33.9 25.3 35.4 24.7 37 24.7" stroke="#0f172a" stroke-width="2.2" stroke-linecap="round" opacity="0.34" />
+  <circle cx="46.5" cy="17" r="3.5" fill="#f97316" />
+  <path d="M46.5 14.4V19.6M43.9 17H49.1" stroke="white" stroke-width="1.6" stroke-linecap="round" />
+</svg>
