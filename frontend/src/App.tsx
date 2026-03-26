@@ -1,5 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 
+// 1. Added the TableRow type to fix the TypeScript indexing conflicts globally
+type TableRow = {
+    id: number;
+    [key: string]: any;
+};
+
 /* ───────── Icons ───────── */
 const ContactsIcon = () => (
     <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
@@ -182,13 +188,12 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
         domain: "",
         name: "",
         owner: "",
-        industry: "",
+        companySize: "",
         type: "",
         city: "",
         state: "",
     });
 
-    // Fixed: Telling TS exactly what `k` is, and allowing `e` to be any input event
     const set = (k: string) => (e: any) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
     return (
@@ -208,14 +213,7 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
                         <XIcon size="w-5 h-5" />
                     </button>
                 </div>
-
                 <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
-                    <div className="flex justify-end">
-                        <button className="text-sm text-blue-600 hover:underline flex items-center gap-0.5">
-                            Edit this form <ExternalLinkIcon />
-                        </button>
-                    </div>
-
                     <div>
                         <label className="block text-xs font-semibold text-gray-800 mb-1.5">
                             Company domain name
@@ -224,7 +222,7 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
                             autoFocus
                             value={form.domain}
                             onChange={set("domain")}
-                            className="w-full border-2 border-blue-400 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all"
+                            className="w-full border-2 border-blue-400 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200 bg-white transition-all"
                         />
                     </div>
 
@@ -235,7 +233,7 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
                         <input
                             value={form.name}
                             onChange={set("name")}
-                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400 transition-colors"
+                            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-400 bg-white transition-colors"
                         />
                     </div>
 
@@ -244,45 +242,36 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
                             Start by entering a domain name, an account name, or both.
                         </p>
                     )}
-
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5">
                             Company owner
                         </label>
-                        <div className="relative">
-                            <div
-                                className="w-20 h-4 bg-gray-200 rounded mb-1 absolute top-2 left-3 animate-pulse"
-                                style={{ display: form.owner ? "none" : "block" }}
-                            />
-                            <select
-                                value={form.owner}
-                                onChange={set("owner")}
-                                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-500 appearance-none focus:outline-none focus:border-blue-400 bg-gray-50"
-                            >
-                                <option value=""></option>
-                                <option>Avataar</option>
-                            </select>
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                <ChevronDownIcon />
-                            </span>
-                        </div>
+                        <input
+                            value={form.owner}
+                            onChange={set("owner")}
+                            placeholder="Enter owner name"
+                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-blue-400 bg-white transition-colors"
+                        />
                     </div>
 
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                            Industry
+                            Company Size
                         </label>
                         <div className="relative">
                             <select
-                                value={form.industry}
-                                onChange={set("industry")}
-                                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-400 appearance-none focus:outline-none focus:border-blue-400 bg-gray-50"
+                                value={form.companySize}
+                                onChange={set("companySize")}
+                                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-500 appearance-none focus:outline-none focus:border-blue-400 bg-white"
                             >
                                 <option value=""></option>
-                                <option>Technology</option>
-                                <option>Finance</option>
-                                <option>Healthcare</option>
-                                <option>Retail</option>
+                                <option>1-10 employees</option>
+                                <option>11-50 employees</option>
+                                <option>51-200 employees</option>
+                                <option>201-500 employees</option>
+                                <option>501-1000 employees</option>
+                                <option>1001-5000 employees</option>
+                                <option>5000+ employees</option>
                             </select>
                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                                 <ChevronDownIcon />
@@ -298,7 +287,7 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
                             <select
                                 value={form.type}
                                 onChange={set("type")}
-                                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-400 appearance-none focus:outline-none focus:border-blue-400 bg-gray-50"
+                                className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-500 appearance-none focus:outline-none focus:border-blue-400 bg-white"
                             >
                                 <option value=""></option>
                                 <option>Prospect</option>
@@ -366,7 +355,7 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
                                     domain: "",
                                     name: "",
                                     owner: "",
-                                    industry: "",
+                                    companySize: "",
                                     type: "",
                                     city: "",
                                     state: "",
@@ -389,240 +378,362 @@ function CreateCompanyModal({ onClose, onSave }: { onClose: () => void; onSave: 
     );
 }
 
+/* ───────── CSV/Excel Import Modal ───────── */
+function ImportModal({ columns, onClose, onImport }: {
+    columns: string[];
+    onClose: () => void;
+    onImport: (rows: Record<string, string>[]) => void;
+}) {
+    const fileRef = useRef<HTMLInputElement>(null);
+    const [error, setError] = useState("");
+    const [preview, setPreview] = useState<{ headers: string[]; rows: string[][] } | null>(null);
+
+    const parseCSV = (text: string) => {
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        if (lines.length < 2) return null;
+        const headers = lines[0].split(",").map(s => s.trim().replace(/^"|"$/g, ""));
+        const rows = lines.slice(1).map(l => l.split(",").map(s => s.trim().replace(/^"|"$/g, "")));
+        return { headers, rows };
+    };
+
+    const handleFile = async (file: File) => {
+        setError(""); setPreview(null);
+        const ext = file.name.split(".").pop()?.toLowerCase();
+        if (ext === "csv") {
+            const text = await file.text();
+            const parsed = parseCSV(text);
+            if (!parsed) { setError("CSV must have a header row and at least one data row."); return; }
+            setPreview(parsed);
+        } else if (ext === "xlsx" || ext === "xls") {
+            setError("Excel support: please export your file as CSV first, then import.");
+        } else {
+            setError("Only .csv or .xlsx/.xls files are supported.");
+        }
+    };
+
+    const mapAndImport = () => {
+        if (!preview) return;
+        const { headers, rows } = preview;
+        const colMap: Record<string, number> = {};
+        columns.forEach(col => {
+            const colLower = col.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const idx = headers.findIndex(h => {
+                const hLower = h.toLowerCase().replace(/[^a-z0-9]/g, "");
+                return hLower === colLower || hLower.includes(colLower) || colLower.includes(hLower);
+            });
+            if (idx >= 0) colMap[col] = idx;
+        });
+        const mapped: Record<string, string>[] = rows.map(row => {
+            const rec: Record<string, string> = {};
+            columns.forEach(col => {
+                const idx = colMap[col];
+                rec[col] = idx !== undefined ? (row[idx] || "--") : "--";
+            });
+            return rec;
+        });
+        onImport(mapped);
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.45)" }}>
+            <div className="bg-white rounded-xl shadow-2xl w-[520px] max-h-[80vh] flex flex-col">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-base font-semibold text-gray-900">Import from CSV</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-100"><XIcon size="w-5 h-5" /></button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+                    <p className="text-xs text-gray-500">Upload a <strong>CSV</strong> file. The first row must be a header row matching the table columns (e.g. <em>{columns.slice(0, 3).join(", ")}</em>…). Data rows below will be auto-sorted into the correct columns.</p>
+                    <div
+                        className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-orange-400 transition-colors"
+                        onClick={() => fileRef.current?.click()}
+                        onDragOver={e => e.preventDefault()}
+                        onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 mx-auto mb-2 text-gray-400">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                        <p className="text-sm text-gray-500">Click or drag & drop a <strong>CSV</strong> or <strong>Excel</strong> file here</p>
+                        <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+                    </div>
+                    {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+                    {preview && (
+                        <div className="space-y-2">
+                            <p className="text-xs text-green-600 font-semibold">✓ Detected {preview.rows.length} data row(s) with columns: {preview.headers.join(", ")}</p>
+                            <div className="overflow-x-auto border border-gray-200 rounded">
+                                <table className="text-xs w-full min-w-max">
+                                    <thead><tr className="bg-gray-50 border-b">{preview.headers.map(h => <th key={h} className="px-2 py-1.5 text-left text-gray-500 font-medium whitespace-nowrap">{h}</th>)}</tr></thead>
+                                    <tbody>{preview.rows.slice(0, 4).map((r, i) => <tr key={i} className="border-b border-gray-100">{r.map((c, j) => <td key={j} className="px-2 py-1 text-gray-700 whitespace-nowrap">{c}</td>)}</tr>)}</tbody>
+                                </table>
+                            </div>
+                            {preview.rows.length > 4 && <p className="text-xs text-gray-400">…and {preview.rows.length - 4} more rows</p>}
+                        </div>
+                    )}
+                </div>
+                <div className="flex gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                    <button onClick={mapAndImport} disabled={!preview} className="px-4 py-2 text-sm font-semibold text-white rounded-md transition-colors hover:opacity-90 disabled:opacity-40" style={{ background: "#1a1f2e" }}>Import</button>
+                    <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-white">Cancel</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/* ───────── Create Contact Modal ───────── */
+function CreateContactModal({ onClose, onSave }: { onClose: () => void; onSave: (form: any) => void; }) {
+    const [form, setForm] = useState({ email: "", firstName: "", lastName: "", owner: "Shlok Parekh", jobTitle: "", phone: "" });
+    const set = (k: string) => (e: any) => setForm(f => ({ ...f, [k]: e.target.value }));
+    const showHint = !form.email && !form.firstName && !form.lastName;
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: "rgba(0,0,0,0.4)" }}>
+            <div className="bg-white rounded-xl shadow-2xl w-[480px] max-h-[90vh] flex flex-col">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                    <h2 className="text-lg font-semibold text-gray-900">Create Contact</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700 p-1 rounded hover:bg-gray-100"><XIcon size="w-5 h-5" /></button>
+                </div>
+                <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-800 mb-1.5">Email</label>
+                        <input autoFocus value={form.email} onChange={set("email")} className="w-full border-2 border-blue-400 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-200 transition-all" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-800 mb-1.5">First name</label>
+                        <input value={form.firstName} onChange={set("firstName")} className="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-400 transition-colors" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-semibold text-gray-800 mb-1.5">Last name</label>
+                        <input value={form.lastName} onChange={set("lastName")} className="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:border-blue-400 transition-colors" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5">Contact owner</label>
+                        <input value={form.owner} onChange={set("owner")} placeholder="Enter owner name"
+                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-400 transition-colors" />
+                    </div>
+                    {showHint && (
+                        <p className="text-xs text-gray-400 text-center py-2 bg-gray-50 rounded-lg px-4">Start by entering the Contact's name, email, or both.</p>
+                    )}
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1">Job title</label>
+                        <input value={form.jobTitle} onChange={set("jobTitle")} className="w-full border-b border-gray-300 px-0 py-1.5 text-sm focus:outline-none focus:border-blue-400 bg-transparent" />
+                    </div>
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1">Phone number</label>
+                        <input value={form.phone} onChange={set("phone")} type="tel" className="w-full border-b border-gray-300 px-0 py-1.5 text-sm focus:outline-none focus:border-blue-400 bg-transparent" />
+                    </div>
+                </div>
+                <div className="flex items-center gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                    <button onClick={() => { if (form.email || form.firstName || form.lastName) { onSave(form); onClose(); } else alert("Please enter a name or email."); }}
+                        className="px-4 py-2 text-sm font-semibold text-white rounded-md hover:opacity-90" style={{ background: "#1a1f2e" }}>Create</button>
+                    <button onClick={() => { if (form.email || form.firstName || form.lastName) { onSave(form); setForm({ email: "", firstName: "", lastName: "", owner: "Shlok Parekh", jobTitle: "", phone: "" }); } }}
+                        className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-white">Create and add another</button>
+                    <button onClick={onClose} className="px-4 py-2 text-sm font-semibold text-gray-800 border-2 border-gray-800 rounded-md hover:bg-gray-100 ml-auto">Cancel</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 /* ───────── Contacts View ───────── */
+const CONTACTS_KEY = "custbuds_contacts";
+const CONTACTS_COLS_KEY = "custbuds_contacts_cols";
+
 function ContactsView() {
     const [activeTab, setActiveTab] = useState("all");
     const [tableSearch, setTableSearch] = useState("");
-    const [contacts, setContacts] = useState([
-        {
-            id: 1,
-            name: "Brian Halligan (Sampl...",
-            email: "bh@hubspot.com",
-            phone: "--",
-            owner: "No owner",
-        },
-        {
-            id: 2,
-            name: "Maria Johnson (Samp...",
-            email: "emailmaria@hubspot.com...",
-            phone: "--",
-            owner: "No owner",
-        },
-    ]);
+    const [showImport, setShowImport] = useState(false);
+    const [showCreateContact, setShowCreateContact] = useState(false);
+    const [showAddMenu, setShowAddMenu] = useState(false);
+    const addBtnRef = useRef<HTMLButtonElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
 
-    // Fixed: Telling TS the exact types for the parameters
+    const [columns, setColumns] = useState<string[]>(() => {
+        try { const s = sessionStorage.getItem(CONTACTS_COLS_KEY); return s ? JSON.parse(s) : ["Name", "Email", "Phone Number", "Contact owner"]; }
+        catch { return ["Name", "Email", "Phone Number", "Contact owner"]; }
+    });
+
+    const [contacts, setContacts] = useState<TableRow[]>(() => {
+        try {
+            const s = sessionStorage.getItem(CONTACTS_KEY);
+            return s ? JSON.parse(s) : [
+                { id: 1, Name: "Brian Halligan (Sampl...)", Email: "bh@custbuds.com", "Phone Number": "--", "Contact owner": "No owner" },
+                { id: 2, Name: "Maria Johnson (Samp...)", Email: "maria@custbuds.com", "Phone Number": "--", "Contact owner": "No owner" },
+            ];
+        } catch { return []; }
+    });
+
     const update = (id: number, field: string, val: string) =>
-        setContacts((cs) =>
-            cs.map((c) => (c.id === id ? { ...c, [field]: val } : c))
-        );
+        setContacts(cs => cs.map(c => c.id === id ? { ...c, [field]: val } : c));
 
-    const filtered = contacts.filter(
-        (c) =>
-            !tableSearch ||
-            c.name.toLowerCase().includes(tableSearch.toLowerCase()) ||
-            c.email.toLowerCase().includes(tableSearch.toLowerCase())
+    const deleteRow = (id: number) => setContacts(cs => cs.filter(c => c.id !== id));
+
+    const deleteCol = (col: string) => {
+        setColumns(cols => cols.filter(c => c !== col));
+        setContacts(cs => cs.map(c => { const n = { ...c }; delete n[col]; return n; }));
+    };
+
+    // 3. Removed TS assertion here
+    const handleImport = (rows: Record<string, string>[]) => {
+        const newRows = rows.map((r, i) => ({ id: Date.now() + i, ...r }));
+        setContacts(cs => [...cs, ...newRows]);
+    };
+
+    const handleSaveContact = (form: any) => {
+        const fullName = [form.firstName, form.lastName].filter(Boolean).join(" ") || form.email || "New Contact";
+        setContacts(cs => [...cs, {
+            id: Date.now(),
+            "Name": fullName,
+            "Email": form.email || "--",
+            "Phone Number": form.phone || "--",
+            "Contact owner": form.owner || "No owner",
+        }]);
+    };
+
+    // Persist contacts & columns to sessionStorage on every change
+    useEffect(() => { try { sessionStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts)); } catch {} }, [contacts]);
+    useEffect(() => { try { sessionStorage.setItem(CONTACTS_COLS_KEY, JSON.stringify(columns)); } catch {} }, [columns]);
+
+    const filtered = contacts.filter(c =>
+        !tableSearch ||
+        (c["Name"] || "").toLowerCase().includes(tableSearch.toLowerCase()) ||
+        (c["Email"] || "").toLowerCase().includes(tableSearch.toLowerCase())
     );
 
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (
+                menuRef.current && !menuRef.current.contains(e.target as Node) &&
+                addBtnRef.current && !addBtnRef.current.contains(e.target as Node)
+            ) setShowAddMenu(false);
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
+
     return (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <div className="flex items-center justify-between px-4 pt-4 pb-0">
-                <button className="flex items-center gap-1.5 text-sm font-semibold text-gray-800 hover:text-gray-600">
-                    Contacts <ChevronDownIcon />
-                </button>
-                <button
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white hover:opacity-90"
-                    style={{ background: "#1a1f2e" }}
-                >
-                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-                        <path
-                            fillRule="evenodd"
-                            d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                            clipRule="evenodd"
-                        />
-                    </svg>
-                    Add contacts
-                </button>
-            </div>
-
-            <div className="flex items-center border-b border-gray-200 px-4 mt-2 gap-0.5">
-                {[
-                    { id: "all", label: "All contacts", badge: filtered.length },
-                    { id: "my", label: "My contacts" },
-                    { id: "unassigned", label: "Unassigned contacts" },
-                ].map((tab) => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                            ? "border-orange-500 text-orange-600"
-                            : "border-transparent text-gray-500 hover:text-gray-700"
-                            }`}
-                    >
-                        {tab.label}
-                        {tab.badge !== undefined && (
-                            <span
-                                className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-xs font-semibold"
-                                style={{
-                                    background: activeTab === tab.id ? "#1a1f2e" : "#f3f4f6",
-                                    color: activeTab === tab.id ? "white" : "#6b7280",
-                                }}
-                            >
-                                {tab.badge}
-                            </span>
-                        )}
-                    </button>
-                ))}
-            </div>
-
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 flex-wrap">
-                <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">
-                        <SearchIcon />
-                    </span>
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        value={tableSearch}
-                        onChange={(e) => setTableSearch(e.target.value)}
-                        className="pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-orange-400 w-36"
-                    />
-                </div>
-                <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
-                    Table view <ChevronDownIcon />
-                </button>
-                <div className="flex items-center gap-1.5 ml-auto">
-                    {["Edit columns", "Filters", "Sort", "Export", "Save"].map((l) => (
+        <>
+            {showImport && <ImportModal columns={columns} onClose={() => setShowImport(false)} onImport={handleImport} />}
+            {showCreateContact && <CreateContactModal onClose={() => setShowCreateContact(false)} onSave={handleSaveContact} />}
+            <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-4 pt-4 pb-0">
+                    <button className="flex items-center gap-1.5 text-sm font-semibold text-gray-800 hover:text-gray-600">Contacts <ChevronDownIcon /></button>
+                    <div className="relative">
                         <button
-                            key={l}
-                            className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                            ref={addBtnRef}
+                            onClick={() => setShowAddMenu(v => !v)}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white hover:opacity-90 select-none"
+                            style={{ background: "#1a1f2e" }}
                         >
-                            {l}
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" /></svg>
+                            Add contacts <ChevronDownIcon />
+                        </button>
+                        {showAddMenu && (
+                            <div ref={menuRef} className="absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-30 py-1 overflow-hidden">
+                                <button onClick={() => { setShowAddMenu(false); setShowCreateContact(true); }}
+                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    Create new
+                                </button>
+                                <button onClick={() => { setShowAddMenu(false); setShowImport(true); }}
+                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                                    Import
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex items-center border-b border-gray-200 px-4 mt-2 gap-0.5">
+                    {[
+                        { id: "all", label: "All contacts", badge: filtered.length },
+                        { id: "my", label: "My contacts" },
+                        { id: "unassigned", label: "Unassigned contacts" },
+                    ].map(tab => (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                            className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id ? "border-orange-500 text-orange-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
+                            {tab.label}
+                            {tab.badge !== undefined && (
+                                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-xs font-semibold"
+                                    style={{ background: activeTab === tab.id ? "#1a1f2e" : "#f3f4f6", color: activeTab === tab.id ? "white" : "#6b7280" }}>
+                                    {tab.badge}
+                                </span>
+                            )}
                         </button>
                     ))}
                 </div>
-            </div>
 
-            <div className="flex items-center gap-3 px-4 py-2 text-xs text-gray-500 border-b border-gray-100 bg-gray-50/60 flex-wrap">
-                {[
-                    "Contact owner ▾",
-                    "Create date ▾",
-                    "Last activity date ▾",
-                    "Lead status ▾",
-                    "+ More",
-                    "≡ Advanced filters",
-                ].map((f) => (
-                    <button key={f} className="hover:text-gray-700 whitespace-nowrap">
-                        {f}
-                    </button>
-                ))}
-            </div>
-
-            <div className="overflow-x-auto">
-                <table className="w-full min-w-max text-sm">
-                    <thead>
-                        <tr className="bg-gray-50 border-b border-gray-200">
-                            <th className="w-10 px-4 py-2.5">
-                                <input
-                                    type="checkbox"
-                                    className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500"
-                                />
-                            </th>
-                            {["Name", "Email", "Phone Number", "Contact owner"].map((h) => (
-                                <th
-                                    key={h}
-                                    className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
-                                >
-                                    {h}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filtered.map((c) => (
-                            <tr
-                                key={c.id}
-                                className="border-b border-gray-100 hover:bg-orange-50/20 transition-colors"
-                            >
-                                <td className="px-4 py-3">
-                                    <input
-                                        type="checkbox"
-                                        className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500"
-                                    />
-                                </td>
-                                <td className="px-4 py-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-200">
-                                            <HubSpotLogoIcon />
-                                        </div>
-                                        <EditableCell
-                                            value={c.name}
-                                            onChange={(v) => update(c.id, "name", v)}
-                                            link
-                                            className="text-sm font-medium"
-                                        />
-                                    </div>
-                                </td>
-                                <td className="px-4 py-3">
-                                    <EditableCell
-                                        value={c.email}
-                                        onChange={(v) => update(c.id, "email", v)}
-                                        link
-                                        className="text-sm"
-                                    />
-                                </td>
-                                <td className="px-4 py-3 text-sm">
-                                    <EditableCell
-                                        value={c.phone}
-                                        onChange={(v) => update(c.id, "phone", v)}
-                                        className="text-gray-400"
-                                    />
-                                </td>
-                                <td className="px-4 py-3 text-sm">
-                                    <EditableCell
-                                        value={c.owner}
-                                        onChange={(v) => update(c.id, "owner", v)}
-                                        className="text-gray-400"
-                                    />
-                                </td>
-                            </tr>
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 flex-wrap">
+                    <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400"><SearchIcon /></span>
+                        <input type="text" placeholder="Search..." value={tableSearch} onChange={e => setTableSearch(e.target.value)}
+                            className="pl-8 pr-3 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-orange-400 w-36" />
+                    </div>
+                    <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Table view <ChevronDownIcon /></button>
+                    <div className="flex items-center gap-1.5 ml-auto">
+                        {["Edit columns", "Filters", "Sort", "Export", "Save"].map(l => (
+                            <button key={l} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">{l}</button>
                         ))}
-                        {filtered.length === 0 && (
-                            <tr>
-                                <td
-                                    colSpan={5}
-                                    className="px-4 py-10 text-center text-sm text-gray-400"
-                                >
-                                    No contacts found.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
-                <div className="flex items-center gap-1">
-                    <button
-                        className="flex items-center gap-0.5 px-2.5 py-1 text-xs font-medium text-gray-400 hover:text-gray-600"
-                        disabled
-                    >
-                        ‹ Prev
-                    </button>
-                    <button
-                        className="px-2.5 py-1 text-xs font-medium text-white rounded-md"
-                        style={{ background: "#FF7A59" }}
-                    >
-                        1
-                    </button>
-                    <button className="flex items-center gap-0.5 px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700">
-                        Next ›
-                    </button>
+                    </div>
                 </div>
-                <button className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
-                    25 per page <ChevronDownIcon />
-                </button>
+
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-max text-sm">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="w-10 px-4 py-2.5"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500" /></th>
+                                {columns.map(h => (
+                                    <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+                                        <div className="flex items-center gap-1 group">
+                                            {h}
+                                            <button onClick={() => deleteCol(h)} title="Remove column"
+                                                className="opacity-0 group-hover:opacity-100 ml-1 text-gray-400 hover:text-red-500 transition-opacity">
+                                                <XIcon size="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    </th>
+                                ))}
+                                <th className="w-10 px-2 py-2.5"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filtered.map(c => (
+                                <tr key={c.id} className="border-b border-gray-100 hover:bg-orange-50/20 transition-colors group">
+                                    <td className="px-4 py-3"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500" /></td>
+                                    {columns.map((col, ci) => (
+                                        <td key={col} className="px-4 py-3">
+                                            {ci === 0 ? (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-200"><HubSpotLogoIcon /></div>
+                                                    <EditableCell value={c[col] || "--"} onChange={v => update(c.id, col, v)} link className="text-sm font-medium" />
+                                                </div>
+                                            ) : (
+                                                <EditableCell value={c[col] || "--"} onChange={v => update(c.id, col, v)} className="text-sm text-gray-400" />
+                                            )}
+                                        </td>
+                                    ))}
+                                    <td className="px-2 py-3">
+                                        <button onClick={() => deleteRow(c.id)} title="Delete row"
+                                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-red-50">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            {filtered.length === 0 && (
+                                <tr><td colSpan={columns.length + 2} className="px-4 py-10 text-center text-sm text-gray-400">No contacts found.</td></tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                    <div className="flex items-center gap-1">
+                        <button className="px-2.5 py-1 text-xs font-medium text-gray-400" disabled>‹ Prev</button>
+                        <button className="px-2.5 py-1 text-xs font-medium text-white rounded-md" style={{ background: "#FF7A59" }}>1</button>
+                        <button className="px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700">Next ›</button>
+                    </div>
+                    <button className="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">25 per page <ChevronDownIcon /></button>
+                </div>
             </div>
-        </div>
+        </>
     );
 }
 
@@ -632,76 +743,82 @@ function CompaniesView() {
     const [tableSearch, setTableSearch] = useState("");
     const [showAddMenu, setShowAddMenu] = useState(false);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showImport, setShowImport] = useState(false);
 
-    // Fixed: Telling TS what kind of HTML elements these Refs refer to
     const addBtnRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    const [companies, setCompanies] = useState([
-        {
-            id: 1,
-            name: "",
-            owner: "No owner",
-            createDate: "Yesterday at 6:27 PM...",
-            phone: "--",
-            city: "--",
-            industry: "--",
-            revenue: "--",
-        },
-    ]);
+    const [columns, setColumns] = useState<string[]>(() => {
+        try { const s = sessionStorage.getItem("custbuds_company_cols"); return s ? JSON.parse(s) : ["Company name", "Company owner", "Create Date (GMT +5:30)", "Phone Number", "City", "Company Size", "Annual Revenue"]; }
+        catch { return ["Company name", "Company owner", "Create Date (GMT +5:30)", "Phone Number", "City", "Company Size", "Annual Revenue"]; }
+    });
 
-    // Fixed: Telling TS the exact types for the parameters
+    const [companies, setCompanies] = useState<TableRow[]>(() => {
+        try {
+            const s = sessionStorage.getItem("custbuds_companies");
+            return s ? JSON.parse(s) : [{
+                id: 1, "Company name": "", "Company owner": "No owner",
+                "Create Date (GMT +5:30)": "Yesterday at 6:27 PM...",
+                "Phone Number": "--", "City": "--", "Company Size": "--", "Annual Revenue": "--",
+            }];
+        } catch { return []; }
+    });
+
     const update = (id: number, field: string, val: string) =>
-        setCompanies((cs) =>
-            cs.map((c) => (c.id === id ? { ...c, [field]: val } : c))
-        );
+        setCompanies(cs => cs.map(c => c.id === id ? { ...c, [field]: val } : c));
 
-    // Fixed: Adding 'any' so it knows form is an object being passed from the modal
+    const deleteRow = (id: number) => setCompanies(cs => cs.filter(c => c.id !== id));
+
+    const deleteCol = (col: string) => {
+        setColumns(cols => cols.filter(c => c !== col));
+        setCompanies(cs => cs.map(c => { const n = { ...c }; delete n[col]; return n; }));
+    };
+
     const handleSaveNew = (form: any) => {
-        setCompanies((cs) => [
+        setCompanies(cs => [
             ...cs,
             {
                 id: Date.now(),
-                name: form.name || form.domain || "New Company",
-                owner: form.owner || "No owner",
-                createDate: "Just now",
-                phone: "--",
-                city: form.city || "--",
-                industry: form.industry || "--",
-                revenue: "--",
+                "Company name": form.name || form.domain || "New Company",
+                "Company owner": form.owner || "No owner",
+                "Create Date (GMT +5:30)": "Just now",
+                "Phone Number": "--",
+                "City": form.city || "--",
+                "Company Size": form.companySize || "--",
+                "Annual Revenue": "--",
             },
         ]);
     };
 
+    // 5. Removed TS assertion here
+    const handleImport = (rows: Record<string, string>[]) => {
+        const newRows = rows.map((r, i) => ({ id: Date.now() + i, ...r }));
+        setCompanies(cs => [...cs, ...newRows]);
+    };
+
+    // Persist companies & columns to sessionStorage on every change
+    useEffect(() => { try { sessionStorage.setItem("custbuds_companies", JSON.stringify(companies)); } catch {} }, [companies]);
+    useEffect(() => { try { sessionStorage.setItem("custbuds_company_cols", JSON.stringify(columns)); } catch {} }, [columns]);
+
     useEffect(() => {
-        // Fixed: Tell TS this is a standard MouseEvent
         const handler = (e: MouseEvent) => {
             if (
-                menuRef.current &&
-                !menuRef.current.contains(e.target as Node) &&
-                addBtnRef.current &&
-                !addBtnRef.current.contains(e.target as Node)
-            )
-                setShowAddMenu(false);
+                menuRef.current && !menuRef.current.contains(e.target as Node) &&
+                addBtnRef.current && !addBtnRef.current.contains(e.target as Node)
+            ) setShowAddMenu(false);
         };
         document.addEventListener("mousedown", handler);
         return () => document.removeEventListener("mousedown", handler);
     }, []);
 
-    const filtered = companies.filter(
-        (c) =>
-            !tableSearch ||
-            (c.name || "").toLowerCase().includes(tableSearch.toLowerCase())
+    const filtered = companies.filter(c =>
+        !tableSearch || (c["Company name"] || "").toLowerCase().includes(tableSearch.toLowerCase())
     );
 
     return (
         <>
-            {showCreateModal && (
-                <CreateCompanyModal
-                    onClose={() => setShowCreateModal(false)}
-                    onSave={handleSaveNew}
-                />
-            )}
+            {showCreateModal && <CreateCompanyModal onClose={() => setShowCreateModal(false)} onSave={handleSaveNew} />}
+            {showImport && <ImportModal columns={columns} onClose={() => setShowImport(false)} onImport={handleImport} />}
 
             <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-4 pt-4 pb-0">
@@ -718,23 +835,13 @@ function CompaniesView() {
                             Add companies <ChevronDownIcon />
                         </button>
                         {showAddMenu && (
-                            <div
-                                ref={menuRef}
-                                className="absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-30 py-1 overflow-hidden"
-                            >
-                                <button
-                                    onClick={() => {
-                                        setShowAddMenu(false);
-                                        setShowCreateModal(true);
-                                    }}
-                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
+                            <div ref={menuRef} className="absolute right-0 mt-1.5 w-44 bg-white border border-gray-200 rounded-lg shadow-xl z-30 py-1 overflow-hidden">
+                                <button onClick={() => { setShowAddMenu(false); setShowCreateModal(true); }}
+                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                     Create new
                                 </button>
-                                <button
-                                    onClick={() => setShowAddMenu(false)}
-                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
+                                <button onClick={() => { setShowAddMenu(false); setShowImport(true); }}
+                                    className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                                     Import
                                 </button>
                             </div>
@@ -803,111 +910,51 @@ function CompaniesView() {
                     <table className="w-full min-w-max text-sm">
                         <thead>
                             <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="w-10 px-4 py-2.5">
-                                    <input
-                                        type="checkbox"
-                                        className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500"
-                                    />
-                                </th>
-                                {[
-                                    "Company name",
-                                    "Company owner",
-                                    "Create Date (GMT +5:30)",
-                                    "Phone Number",
-                                    "City",
-                                    "Industry",
-                                    "Annual Revenue",
-                                ].map((h) => (
-                                    <th
-                                        key={h}
-                                        className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap"
-                                    >
-                                        {h}
+                                <th className="w-10 px-4 py-2.5"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500" /></th>
+                                {columns.map(h => (
+                                    <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
+                                        <div className="flex items-center gap-1 group">
+                                            {h}
+                                            <button onClick={() => deleteCol(h)} title="Remove column"
+                                                className="opacity-0 group-hover:opacity-100 ml-1 text-gray-400 hover:text-red-500 transition-opacity">
+                                                <XIcon size="w-3 h-3" />
+                                            </button>
+                                        </div>
                                     </th>
                                 ))}
+                                <th className="w-10 px-2 py-2.5"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map((company) => (
-                                <tr
-                                    key={company.id}
-                                    className="border-b border-gray-100 hover:bg-orange-50/20 transition-colors"
-                                >
-                                    <td className="px-4 py-3">
-                                        <input
-                                            type="checkbox"
-                                            className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex items-center gap-2">
-                                            <div
-                                                className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-white text-xs font-bold"
-                                                style={{ background: "#FF7A59" }}
-                                            >
-                                                {(company.name || "?")[0].toUpperCase()}
-                                            </div>
-                                            <EditableCell
-                                                value={company.name}
-                                                onChange={(v) => update(company.id, "name", v)}
-                                                className="text-sm font-medium text-gray-900"
-                                            />
-                                        </div>
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <EditableCell
-                                            value={company.owner}
-                                            onChange={(v) => update(company.id, "owner", v)}
-                                            className="text-sm text-gray-400"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
-                                        <EditableCell
-                                            value={company.createDate}
-                                            onChange={(v) => update(company.id, "createDate", v)}
-                                            className="text-sm text-gray-500"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <EditableCell
-                                            value={company.phone}
-                                            onChange={(v) => update(company.id, "phone", v)}
-                                            className="text-sm text-gray-400"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <EditableCell
-                                            value={company.city}
-                                            onChange={(v) => update(company.id, "city", v)}
-                                            className="text-sm text-gray-400"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <EditableCell
-                                            value={company.industry}
-                                            onChange={(v) => update(company.id, "industry", v)}
-                                            className="text-sm text-gray-400"
-                                        />
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <EditableCell
-                                            value={company.revenue}
-                                            onChange={(v) => update(company.id, "revenue", v)}
-                                            className="text-sm text-gray-400"
-                                        />
+                            {filtered.map(company => (
+                                <tr key={company.id} className="border-b border-gray-100 hover:bg-orange-50/20 transition-colors group">
+                                    <td className="px-4 py-3"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-orange-500" /></td>
+                                    {columns.map((col, ci) => (
+                                        <td key={col} className="px-4 py-3">
+                                            {ci === 0 ? (
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-white text-xs font-bold" style={{ background: "#FF7A59" }}>
+                                                        {(company[col] || "?")[0].toUpperCase()}
+                                                    </div>
+                                                    <EditableCell value={company[col] || "--"} onChange={v => update(company.id, col, v)} className="text-sm font-medium text-gray-900" />
+                                                </div>
+                                            ) : (
+                                                <EditableCell value={company[col] || "--"} onChange={v => update(company.id, col, v)} className="text-sm text-gray-400" />
+                                            )}
+                                        </td>
+                                    ))}
+                                    <td className="px-2 py-3">
+                                        <button onClick={() => deleteRow(company.id)} title="Delete row"
+                                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-red-50">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
                             <tr>
-                                <td
-                                    colSpan={8}
-                                    className="px-4 py-4 text-center text-xs text-gray-400"
-                                >
-                                    Showing {filtered.length}{" "}
-                                    {filtered.length === 1 ? "company" : "companies"} ·{" "}
-                                    <span className="text-orange-500 cursor-pointer hover:underline">
-                                        Import more
-                                    </span>
+                                <td colSpan={columns.length + 2} className="px-4 py-4 text-center text-xs text-gray-400">
+                                    Showing {filtered.length} {filtered.length === 1 ? "company" : "companies"} ·{" "}
+                                    <span onClick={() => setShowImport(true)} className="text-orange-500 cursor-pointer hover:underline">Import more</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -964,7 +1011,7 @@ export default function CRMDashboard() {
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
                     <HubSpotLogoIcon />
                     <span className="text-white font-semibold text-sm tracking-wide">
-                        HubSpot
+                        CustBuds
                     </span>
                 </div>
                 <nav className="flex-1 py-4 space-y-0.5 px-2">
@@ -1009,7 +1056,7 @@ export default function CRMDashboard() {
                             </span>
                             <input
                                 type="text"
-                                placeholder="Search HubSpot"
+                                placeholder="Search CustBuds"
                                 value={searchValue}
                                 onChange={(e) => setSearchValue(e.target.value)}
                                 className="w-full pl-9 pr-4 py-1.5 rounded-md text-sm text-white placeholder-gray-500 border border-white/10 focus:outline-none focus:border-orange-400 transition-colors"
@@ -1046,7 +1093,7 @@ export default function CRMDashboard() {
                                     in one place
                                 </p>
                                 <p className="text-xs text-gray-500 leading-relaxed mb-3">
-                                    HubSpot uses this connection to organize communication history
+                                    CustBuds uses this connection to organize communication history
                                     and enrich profiles with accurate job titles, locations, and
                                     more.
                                 </p>
