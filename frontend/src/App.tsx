@@ -23,6 +23,20 @@ type AgentResult = {
     companyName: string; // added by the frontend before storing
 };
 
+type DealRecord = {
+    id: number;
+    name: string;
+    stage: string;
+    owner: string;
+    value: string;
+    contact: string;
+    account: string;
+    priority: string;
+    duration: string;
+    expectedClose: string;
+    status: "active" | "won";
+};
+
 /* ═══════════════════════════════════════════════════════
    PROSPECTING AGENT RESULT PANEL
    Rendered in the main content area after the agent runs.
@@ -2127,6 +2141,530 @@ function CompetitiveIntelligenceView() {
     );
 }
 
+const DEALS_STORAGE_KEY = "custbuds_deals";
+const DEFAULT_DEALS: DealRecord[] = [
+    {
+        id: 1,
+        name: "Web Design Retainer",
+        stage: "New",
+        owner: "Shlok Parekh",
+        value: "--",
+        contact: "Sammie Smith",
+        account: "King Media",
+        priority: "None",
+        duration: "0 days",
+        expectedClose: "TBD",
+        status: "active",
+    },
+    {
+        id: 2,
+        name: "Deal 1",
+        stage: "Discovery",
+        owner: "Priya Shah",
+        value: "$70,000",
+        contact: "Madison Doyle",
+        account: "Bindeer Inc.",
+        priority: "High",
+        duration: "27 days",
+        expectedClose: "Jun 24",
+        status: "active",
+    },
+    {
+        id: 3,
+        name: "Deal 2",
+        stage: "Proposal",
+        owner: "Arjun Mehta",
+        value: "$122,000",
+        contact: "Leilani Krause",
+        account: "Pear Inc.",
+        priority: "High",
+        duration: "14 days",
+        expectedClose: "Jun 26",
+        status: "active",
+    },
+    {
+        id: 4,
+        name: "Deal 3",
+        stage: "Negotiation",
+        owner: "Kavya Nair",
+        value: "$78,000",
+        contact: "Phoenix Levy",
+        account: "HSBF",
+        priority: "Medium",
+        duration: "6 days",
+        expectedClose: "Jun 19",
+        status: "active",
+    },
+    {
+        id: 5,
+        name: "Deal name 5",
+        stage: "Won",
+        owner: "Rohan Singh",
+        value: "$89,000",
+        contact: "Leilani Krause",
+        account: "Pear Inc.",
+        priority: "None",
+        duration: "31 total days",
+        expectedClose: "Jan 15, 2026",
+        status: "won",
+    },
+];
+
+const dealStageTone = (stage: string) => {
+    const key = stage.toLowerCase();
+    if (key === "new") return { bg: "#ffedd5", text: "#c2410c" };
+    if (key === "discovery") return { bg: "#dbeafe", text: "#1d4ed8" };
+    if (key === "proposal") return { bg: "#dcfce7", text: "#166534" };
+    if (key === "negotiation") return { bg: "#ede9fe", text: "#6d28d9" };
+    if (key === "won") return { bg: "#dcfce7", text: "#15803d" };
+    return { bg: "#e5e7eb", text: "#4b5563" };
+};
+
+const dealPriorityTone = (priority: string) => {
+    const key = priority.toLowerCase();
+    if (key === "high") return { bg: "#fee2e2", text: "#b91c1c" };
+    if (key === "medium") return { bg: "#fef3c7", text: "#b45309" };
+    if (key === "low") return { bg: "#dcfce7", text: "#15803d" };
+    return { bg: "#e5e7eb", text: "#6b7280" };
+};
+
+const parseDealValue = (value: string) => {
+    const numeric = Number(String(value || "").replace(/[^0-9.]/g, ""));
+    return Number.isFinite(numeric) ? numeric : 0;
+};
+
+const parseDealDays = (value: string) => {
+    const match = String(value || "").match(/(\d+)/);
+    return match ? Number(match[1]) : 0;
+};
+
+const formatDealValue = (value: number) =>
+    new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+    }).format(value);
+
+const ownerInitials = (name: string) =>
+    String(name || "?")
+        .split(" ")
+        .filter(Boolean)
+        .slice(0, 2)
+        .map(part => part[0]?.toUpperCase())
+        .join("") || "?";
+
+function InlineChipSelect({
+    value,
+    options,
+    onChange,
+    tone,
+}: {
+    value: string;
+    options: string[];
+    onChange: (value: string) => void;
+    tone: (value: string) => { bg: string; text: string };
+}) {
+    const [open, setOpen] = useState(false);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const colors = tone(value);
+
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e: MouseEvent) => {
+            if (
+                menuRef.current && !menuRef.current.contains(e.target as Node) &&
+                buttonRef.current && !buttonRef.current.contains(e.target as Node)
+            ) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, [open]);
+
+    return (
+        <div className="relative inline-block">
+            <button
+                ref={buttonRef}
+                onClick={() => setOpen(v => !v)}
+                className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold shadow-sm"
+                style={{ background: colors.bg, color: colors.text }}
+            >
+                <span>{value}</span>
+                <ChevronDownIcon />
+            </button>
+            {open && (
+                <div
+                    ref={menuRef}
+                    className="absolute left-0 top-full z-20 mt-1 w-36 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl"
+                >
+                    {options.map(option => {
+                        const optionTone = tone(option);
+                        return (
+                            <button
+                                key={option}
+                                onClick={() => {
+                                    onChange(option);
+                                    setOpen(false);
+                                }}
+                                className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-medium hover:bg-gray-50 transition-colors"
+                            >
+                                <span>{option}</span>
+                                <span
+                                    className="h-2.5 w-2.5 rounded-full"
+                                    style={{ background: optionTone.text }}
+                                />
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function DealsTableSection({
+    title,
+    description,
+    accent,
+    deals,
+    addLabel,
+    isOpen,
+    onToggle,
+    onAddDeal,
+    updateDeal,
+}: {
+    title: string;
+    description: string;
+    accent: string;
+    deals: DealRecord[];
+    addLabel: string;
+    isOpen: boolean;
+    onToggle: () => void;
+    onAddDeal: () => void;
+    updateDeal: (id: number, field: keyof DealRecord, value: string) => void;
+}) {
+    const totalValue = deals.reduce((sum, deal) => sum + parseDealValue(deal.value), 0);
+    const avgCycle = deals.length
+        ? Math.round(deals.reduce((sum, deal) => sum + parseDealDays(deal.duration), 0) / deals.length)
+        : 0;
+    const nextClose = deals
+        .map(deal => deal.expectedClose)
+        .find(value => value && value !== "TBD") || "TBD";
+
+    return (
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+                <button onClick={onToggle} className="flex items-center gap-3 text-left">
+                    <div className={`transition-transform ${isOpen ? "" : "-rotate-90"}`}>
+                        <ChevronDownIcon />
+                    </div>
+                    <div className="h-8 w-1 rounded-full" style={{ background: accent }} />
+                    <div>
+                        <div className="text-sm font-bold text-gray-900">{title}</div>
+                        <div className="text-xs text-gray-400">{description}</div>
+                    </div>
+                </button>
+                <button
+                    onClick={onAddDeal}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                    {addLabel}
+                </button>
+            </div>
+
+            {isOpen && (
+                <>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-[1120px] w-full text-sm border-collapse">
+                            <thead>
+                                <tr className="bg-slate-50 border-b border-gray-200">
+                                    <th className="w-10 px-3 py-2.5 border-r border-gray-200">
+                                        <input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-sky-500" />
+                                    </th>
+                                    {["Deal", "Stage", "Owner", "Deal Value", "Contacts", "Accounts", "Priority", "Deal length", "Expected Close"].map(header => (
+                                        <th
+                                            key={header}
+                                            className="whitespace-nowrap border-r border-gray-200 px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 last:border-r-0"
+                                        >
+                                            {header}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {deals.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={10} className="px-4 py-10 text-center text-sm text-gray-400">
+                                            No deals match this view yet.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    deals.map(deal => (
+                                        <tr key={deal.id} className="border-b border-gray-100 align-top hover:bg-sky-50/20 transition-colors">
+                                            <td className="px-3 py-3 border-r border-gray-200 text-center">
+                                                <input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-sky-500" />
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <div className="space-y-1">
+                                                    <EditableCell
+                                                        value={deal.name}
+                                                        onChange={value => updateDeal(deal.id, "name", value)}
+                                                        className="text-sm font-semibold text-gray-900"
+                                                    />
+                                                    <div className="text-[11px] text-gray-400">
+                                                        {deal.status === "won" ? "Closed won" : "Open deal"}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <InlineChipSelect
+                                                    value={deal.stage}
+                                                    options={["New", "Discovery", "Proposal", "Negotiation", "Won"]}
+                                                    onChange={value => updateDeal(deal.id, "stage", value)}
+                                                    tone={dealStageTone}
+                                                />
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[11px] font-bold text-slate-600">
+                                                        {ownerInitials(deal.owner)}
+                                                    </div>
+                                                    <EditableCell
+                                                        value={deal.owner}
+                                                        onChange={value => updateDeal(deal.id, "owner", value)}
+                                                        className="text-sm text-gray-700"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <EditableCell
+                                                    value={deal.value}
+                                                    onChange={value => updateDeal(deal.id, "value", value)}
+                                                    className="text-sm font-semibold text-gray-900"
+                                                />
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <div className="inline-flex max-w-[180px] items-center rounded-md bg-teal-50 px-2.5 py-1">
+                                                    <EditableCell
+                                                        value={deal.contact}
+                                                        onChange={value => updateDeal(deal.id, "contact", value)}
+                                                        className="text-xs font-semibold text-teal-700"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <div className="inline-flex max-w-[180px] items-center rounded-md bg-sky-50 px-2.5 py-1">
+                                                    <EditableCell
+                                                        value={deal.account}
+                                                        onChange={value => updateDeal(deal.id, "account", value)}
+                                                        className="text-xs font-semibold text-sky-700"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <InlineChipSelect
+                                                    value={deal.priority}
+                                                    options={["High", "Medium", "Low", "None"]}
+                                                    onChange={value => updateDeal(deal.id, "priority", value)}
+                                                    tone={dealPriorityTone}
+                                                />
+                                            </td>
+                                            <td className="px-3 py-3 border-r border-gray-200">
+                                                <EditableCell
+                                                    value={deal.duration}
+                                                    onChange={value => updateDeal(deal.id, "duration", value)}
+                                                    className="text-sm text-gray-600"
+                                                />
+                                            </td>
+                                            <td className="px-3 py-3 text-sm text-gray-600">
+                                                <EditableCell
+                                                    value={deal.expectedClose}
+                                                    onChange={value => updateDeal(deal.id, "expectedClose", value)}
+                                                    className="text-sm text-gray-600"
+                                                />
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className="grid gap-3 border-t border-gray-100 bg-slate-50/80 px-4 py-3 sm:grid-cols-3">
+                        <div className="rounded-lg border border-white bg-white px-3 py-2 shadow-sm">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">Total value</div>
+                            <div className="mt-1 text-sm font-bold text-gray-900">{formatDealValue(totalValue)}</div>
+                        </div>
+                        <div className="rounded-lg border border-white bg-white px-3 py-2 shadow-sm">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">Average cycle</div>
+                            <div className="mt-1 text-sm font-bold text-gray-900">{avgCycle} days</div>
+                        </div>
+                        <div className="rounded-lg border border-white bg-white px-3 py-2 shadow-sm">
+                            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">Next close</div>
+                            <div className="mt-1 text-sm font-bold text-gray-900">{nextClose}</div>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
+
+function DealsView() {
+    const [tableSearch, setTableSearch] = useState("");
+    const [deals, setDeals] = useState<DealRecord[]>(() => {
+        try {
+            const stored = localStorage.getItem(DEALS_STORAGE_KEY);
+            return stored ? JSON.parse(stored) : DEFAULT_DEALS;
+        } catch {
+            return DEFAULT_DEALS;
+        }
+    });
+    const [sectionsOpen, setSectionsOpen] = useState({ active: true, won: true });
+
+    useEffect(() => {
+        try {
+            localStorage.setItem(DEALS_STORAGE_KEY, JSON.stringify(deals));
+        } catch {}
+    }, [deals]);
+
+    const updateDeal = (id: number, field: keyof DealRecord, value: string) => {
+        setDeals(current =>
+            current.map(deal => {
+                if (deal.id !== id) return deal;
+                const nextDeal = { ...deal, [field]: value } as DealRecord;
+                if (field === "stage") {
+                    nextDeal.status = value.toLowerCase() === "won" ? "won" : "active";
+                }
+                return nextDeal;
+            })
+        );
+    };
+
+    const addDeal = (status: DealRecord["status"]) => {
+        const newDeal: DealRecord = {
+            id: Date.now(),
+            name: status === "won" ? "New Won Deal" : "New Deal",
+            stage: status === "won" ? "Won" : "New",
+            owner: "Unassigned",
+            value: "--",
+            contact: "--",
+            account: "--",
+            priority: status === "won" ? "None" : "Medium",
+            duration: "0 days",
+            expectedClose: status === "won" ? "Closed" : "TBD",
+            status,
+        };
+
+        setDeals(current =>
+            status === "active" ? [newDeal, ...current] : [...current, newDeal]
+        );
+        setSectionsOpen(current => ({ ...current, [status]: true }));
+    };
+
+    const filteredDeals = useMemo(() => {
+        const query = tableSearch.trim().toLowerCase();
+        if (!query) return deals;
+        return deals.filter(deal =>
+            [deal.name, deal.owner, deal.contact, deal.account, deal.stage, deal.priority]
+                .some(value => String(value || "").toLowerCase().includes(query))
+        );
+    }, [deals, tableSearch]);
+
+    const activeDeals = filteredDeals.filter(deal => deal.status === "active");
+    const wonDeals = filteredDeals.filter(deal => deal.status === "won");
+    const activePipelineValue = activeDeals.reduce((sum, deal) => sum + parseDealValue(deal.value), 0);
+    const highPriorityDeals = activeDeals.filter(deal => deal.priority === "High").length;
+    const closingSoonDeals = activeDeals.filter(deal => parseDealDays(deal.duration) <= 14).length;
+    const wonRevenue = wonDeals.reduce((sum, deal) => sum + parseDealValue(deal.value), 0);
+
+    return (
+        <div className="space-y-6">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-5">
+                <div className="flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3">
+                        <div
+                            className="w-10 h-10 rounded-xl flex items-center justify-center"
+                            style={{ background: "linear-gradient(135deg,#0ea5e9,#14b8a6)" }}
+                        >
+                            <svg viewBox="0 0 20 20" fill="white" className="w-5 h-5">
+                                <path d="M3 5.75A1.75 1.75 0 014.75 4h10.5A1.75 1.75 0 0117 5.75v8.5A1.75 1.75 0 0115.25 16H4.75A1.75 1.75 0 013 14.25v-8.5z" />
+                                <path d="M6 7h8v2H6V7zm0 4h5v2H6v-2z" fill="#dff9fb" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 className="text-lg font-bold text-gray-900">Deals Pipeline</h1>
+                            <p className="text-xs text-gray-400">Grouped tables for open opportunities and closed-won deals, styled to match the CRM.</p>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => addDeal("active")}
+                        className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold text-white hover:opacity-90 transition-opacity"
+                        style={{ background: "linear-gradient(135deg,#0ea5e9,#14b8a6)" }}
+                    >
+                        <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                            <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                        </svg>
+                        Add deal
+                    </button>
+                </div>
+            </div>
+
+            <div className="flex gap-4 flex-wrap">
+                <MetricCard label="Active Deals" value={String(activeDeals.length)} sub={`${highPriorityDeals} high priority`} />
+                <MetricCard label="Open Pipeline" value={formatDealValue(activePipelineValue)} sub="Current active value" />
+                <MetricCard label="Closing Soon" value={String(closingSoonDeals)} sub="14 days or less" />
+                <MetricCard label="Closed Won" value={String(wonDeals.length)} sub={formatDealValue(wonRevenue)} />
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="flex items-center gap-3 border-b border-gray-100 px-6 py-4 flex-wrap">
+                    <div className="relative flex-1 min-w-[240px]">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+                            <SearchIcon />
+                        </span>
+                        <input
+                            type="text"
+                            value={tableSearch}
+                            onChange={e => setTableSearch(e.target.value)}
+                            placeholder="Search deals, contacts, accounts, or owners..."
+                            className="w-full rounded-md border border-gray-300 py-2 pl-8 pr-3 text-xs focus:outline-none focus:border-sky-400"
+                        />
+                    </div>
+                    <div className="text-xs text-gray-400">Double-click any text cell to edit it.</div>
+                </div>
+
+                <div className="space-y-4 p-4">
+                    <DealsTableSection
+                        title="Active Deals"
+                        description="Opportunities currently moving through the pipeline"
+                        accent="#0ea5e9"
+                        deals={activeDeals}
+                        addLabel="Add active deal"
+                        isOpen={sectionsOpen.active}
+                        onToggle={() => setSectionsOpen(current => ({ ...current, active: !current.active }))}
+                        onAddDeal={() => addDeal("active")}
+                        updateDeal={updateDeal}
+                    />
+                    <DealsTableSection
+                        title="Closed Won"
+                        description="Deals already landed and ready for handoff"
+                        accent="#22c55e"
+                        deals={wonDeals}
+                        addLabel="Add won deal"
+                        isOpen={sectionsOpen.won}
+                        onToggle={() => setSectionsOpen(current => ({ ...current, won: !current.won }))}
+                        onAddDeal={() => addDeal("won")}
+                        updateDeal={updateDeal}
+                    />
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function PlaceholderView({ title, desc }: { title: string; desc: string }) {
     return (
         <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
@@ -2459,7 +2997,7 @@ export default function CRMDashboard() {
 
                         {activeNav === "contacts" ? <ContactsView /> :
                          activeNav === "companies" ? <CompaniesView onAgentStart={handleAgentStart} onAgentResult={handleAgentResult} /> :
-                         activeNav === "deals" ? <PlaceholderView title="Deals Pipeline" desc="Manage your sales pipeline, track deal stages, and forecast revenue." /> :
+                         activeNav === "deals" ? <DealsView /> :
                          activeNav === "meetings" ? <PlaceholderView title="Meetings" desc="Schedule, review, and follow up on your upcoming and past meetings." /> :
                          activeNav === "calls" ? <PlaceholderView title="Calls" desc="Log calls, review call transcripts, and track your outreach." /> :
                          activeNav === "prospecting" ? <ProspectingAgentView agentResults={agentResults} onProspectAll={handleProspectAll} /> :
