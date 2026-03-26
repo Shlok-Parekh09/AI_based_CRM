@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 
 // ── TableRow type ────────────────────────────────────────────
 type TableRow = {
@@ -144,6 +144,22 @@ function AgentResultPanel({ result, onClose }: { result: AgentResult; onClose: (
 }
 
 /* ───────── Icons ───────── */
+const DealsIcon = () => (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+        <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z" />
+        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clipRule="evenodd" />
+    </svg>
+);
+const MeetingsIcon = () => (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+        <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z" />
+    </svg>
+);
+const CallsIcon = () => (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
+        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.438a1 1 0 01-.32.893L4.6 10.123a13.013 13.013 0 005.275 5.275l1.956-1.956a1 1 0 01.893-.32l4.438.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+    </svg>
+);
 const ContactsIcon = () => (
     <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
         <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
@@ -197,50 +213,12 @@ const ExternalLinkIcon = () => (
 );
 
 const GmailIcon = () => (
-    <svg
-        viewBox="0 0 24 24"
-        className="w-4 h-4"
-        xmlns="http://www.w3.org/2000/svg"
-    >
-        <path
-            d="M2 6a2 2 0 012-2h16a2 2 0 012 2v12a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-            fill="#F2F2F2"
-        />
-        <path d="M2 6l10 7 10-7" stroke="#EA4335" strokeWidth="0" fill="none" />
-        <path
-            d="M2 6.5L12 13l10-6.5V18a1 1 0 01-1 1H3a1 1 0 01-1-1V6.5z"
-            fill="#4285F4"
-            opacity="0"
-        />
-        <rect
-            x="2"
-            y="4"
-            width="20"
-            height="16"
-            rx="2"
-            fill="white"
-            stroke="#E0E0E0"
-            strokeWidth="0.5"
-        />
-        <path
-            d="M2 6l10 7.5L22 6"
-            fill="none"
-            stroke="#EA4335"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-        />
-        <path d="M2 6v12h20V6L12 13.5 2 6z" fill="none" />
-        <text
-            x="5"
-            y="17"
-            fontSize="7"
-            fontWeight="bold"
-            fill="#4285F4"
-            fontFamily="Arial,sans-serif"
-        >
-            G
-        </text>
-        <path d="M2 6l10 7.5L22 6" fill="#EA4335" opacity="0.15" />
+    <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none">
+        <path d="M15.75 21H21C21.4142 21 21.75 20.6642 21.75 20.25V6.75L16.5 10.5V21H15.75Z" fill="#34A853"/>
+        <path d="M3 20.25C3 20.6642 3.33579 21 3.75 21H8.25V10.5L3 6.75V20.25Z" fill="#4285F4"/>
+        <path d="M16.5 3.375V10.5L21.75 6.75V4.5C21.75 3.1934 20.231 2.47353 19.2 3.3L16.5 5.25V3.375Z" fill="#FBBC04"/>
+        <path d="M16.5 3.375L12 6L7.5 3.375V10.5L3 6.75V4.5C3 3.1934 4.51901 2.47353 5.55 3.3L7.5 5.25V3.375Z" fill="#EA4335"/>
+        <path d="M16.5 5.25L12 9.5L7.5 5.25L7.5 3.375L12 6L16.5 3.375V5.25Z" fill="#C5221F"/>
     </svg>
 );
 
@@ -329,11 +307,12 @@ function CreateCompanyModal({ onClose, onSave, onAgentStart, onAgentResult }: {
     const [form, setForm] = useState({
         domain: "",
         name: "",
-        owner: "",
+        email: "",
         companySize: "",
         type: "",
         city: "",
         state: "",
+        revenue: "",
     });
 
     const set = (k: string) => (e: any) => setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -379,19 +358,16 @@ function CreateCompanyModal({ onClose, onSave, onAgentStart, onAgentResult }: {
                         />
                     </div>
 
-                    {!form.domain && !form.name && (
-                        <p className="text-xs text-gray-400 text-center py-1 bg-gray-50 rounded-lg px-4">
-                            Start by entering a domain name, an account name, or both.
-                        </p>
-                    )}
+
+
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1.5">
-                            Company owner
+                            Company Email ID
                         </label>
                         <input
-                            value={form.owner}
-                            onChange={set("owner")}
-                            placeholder="Enter owner name"
+                            value={form.email}
+                            onChange={set("email")}
+                            placeholder="hello@company.com"
                             className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-sky-400 bg-white transition-colors"
                         />
                     </div>
@@ -419,6 +395,19 @@ function CreateCompanyModal({ onClose, onSave, onAgentStart, onAgentResult }: {
                                 <ChevronDownIcon />
                             </span>
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-medium text-gray-400 mb-1.5">
+                            Annual Revenue
+                        </label>
+                        <input
+                            type="text"
+                            value={form.revenue}
+                            onChange={set("revenue")}
+                            placeholder="$1,000,000"
+                            className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:border-sky-400 bg-white transition-colors"
+                        />
                     </div>
 
                     <div>
@@ -495,7 +484,6 @@ function CreateCompanyModal({ onClose, onSave, onAgentStart, onAgentResult }: {
                                             city: form.city,
                                             companySize: form.companySize,
                                             type: form.type,
-                                            owner: form.owner,
                                         }),
                                     });
                                     if (!res.ok) throw new Error(await res.text());
@@ -521,11 +509,12 @@ function CreateCompanyModal({ onClose, onSave, onAgentStart, onAgentResult }: {
                                 setForm({
                                     domain: "",
                                     name: "",
-                                    owner: "",
+                                    email: "",
                                     companySize: "",
                                     type: "",
                                     city: "",
                                     state: "",
+                                    revenue: "",
                                 });
                             }
                         }}
@@ -676,9 +665,7 @@ function CreateContactModal({ onClose, onSave }: { onClose: () => void; onSave: 
                         <input value={form.owner} onChange={set("owner")} placeholder="Enter owner name"
                             className="w-full border border-gray-200 rounded px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:border-sky-400 transition-colors" />
                     </div>
-                    {showHint && (
-                        <p className="text-xs text-gray-400 text-center py-2 bg-gray-50 rounded-lg px-4">Start by entering the Contact's name, email, or both.</p>
-                    )}
+
                     <div>
                         <label className="block text-xs font-medium text-gray-400 mb-1">Job title</label>
                         <input value={form.jobTitle} onChange={set("jobTitle")} className="w-full border-b border-gray-300 px-0 py-1.5 text-sm focus:outline-none focus:border-sky-400 bg-transparent" />
@@ -710,21 +697,23 @@ function ContactsView() {
     const [showImport, setShowImport] = useState(false);
     const [showCreateContact, setShowCreateContact] = useState(false);
     const [showAddMenu, setShowAddMenu] = useState(false);
+
+    // ── Pagination State ──
+    const [pageSize, setPageSize] = useState(25);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showPageSizeMenu, setShowPageSizeMenu] = useState(false);
     const addBtnRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
     const [columns, setColumns] = useState<string[]>(() => {
-        try { const s = sessionStorage.getItem(CONTACTS_COLS_KEY); return s ? JSON.parse(s) : ["Name", "Email", "Phone Number", "Contact owner"]; }
+        try { const s = localStorage.getItem(CONTACTS_COLS_KEY); return s ? JSON.parse(s) : ["Name", "Email", "Phone Number", "Contact owner"]; }
         catch { return ["Name", "Email", "Phone Number", "Contact owner"]; }
     });
 
     const [contacts, setContacts] = useState<TableRow[]>(() => {
         try {
-            const s = sessionStorage.getItem(CONTACTS_KEY);
-            return s ? JSON.parse(s) : [
-                { id: 1, Name: "Brian Halligan (Sampl...)", Email: "bh@custbuds.com", "Phone Number": "--", "Contact owner": "No owner" },
-                { id: 2, Name: "Maria Johnson (Samp...)", Email: "maria@custbuds.com", "Phone Number": "--", "Contact owner": "No owner" },
-            ];
+            const s = localStorage.getItem(CONTACTS_KEY);
+            return s ? JSON.parse(s) : [];
         } catch { return []; }
     });
 
@@ -755,15 +744,53 @@ function ContactsView() {
         }]);
     };
 
-    // Persist contacts & columns to sessionStorage on every change
-    useEffect(() => { try { sessionStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts)); } catch {} }, [contacts]);
-    useEffect(() => { try { sessionStorage.setItem(CONTACTS_COLS_KEY, JSON.stringify(columns)); } catch {} }, [columns]);
+    // Persist contacts & columns to localStorage on every change
+    useEffect(() => { try { localStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts)); } catch {} }, [contacts]);
+    useEffect(() => { try { localStorage.setItem(CONTACTS_COLS_KEY, JSON.stringify(columns)); } catch {} }, [columns]);
 
     const filtered = contacts.filter(c =>
         !tableSearch ||
         (c["Name"] || "").toLowerCase().includes(tableSearch.toLowerCase()) ||
         (c["Email"] || "").toLowerCase().includes(tableSearch.toLowerCase())
     );
+
+    const [sortRule, setSortRule] = useState<{ col: string, asc: boolean }>({ col: "", asc: true });
+    const [showSort, setShowSort] = useState(false);
+    const [showEditCols, setShowEditCols] = useState(false);
+    const [newColName, setNewColName] = useState("");
+
+    const exportExcel = () => {
+        const header = ["id", ...columns].join(",");
+        const rows = contacts.map(c => [c.id, ...columns.map(col => `"${String(c[col] || "").replace(/"/g, '""')}"`)].join(","));
+        const csv = [header, ...rows].join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "contacts_export.csv";
+        a.click();
+    };
+
+    const sortedFiltered = useMemo(() => {
+        let res = [...filtered];
+        if (sortRule.col) {
+            res.sort((a, b) => {
+                const av = String(a[sortRule.col] || "");
+                const bv = String(b[sortRule.col] || "");
+                return sortRule.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+            });
+        }
+        return res;
+    }, [filtered, sortRule]);
+
+    const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / pageSize));
+    const safeCurrentPage = Math.min(currentPage, totalPages);
+    
+    useEffect(() => {
+        if (currentPage !== safeCurrentPage) setCurrentPage(safeCurrentPage);
+    }, [safeCurrentPage, currentPage]);
+
+    const paginatedData = sortedFiltered.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -835,69 +862,161 @@ function ContactsView() {
                     </div>
                     <button className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Table view <ChevronDownIcon /></button>
                     <div className="flex items-center gap-1.5 ml-auto">
-                        {["Edit columns", "Filters", "Sort", "Export", "Save"].map(l => (
-                            <button key={l} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">{l}</button>
-                        ))}
+                        <div className="relative">
+                            <button onClick={() => setShowEditCols(v => !v)} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">
+                                Edit columns
+                            </button>
+                            {showEditCols && (
+                                <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 shadow-xl rounded-lg z-20 p-2">
+                                    <div className="flex gap-1 mb-2">
+                                        <input value={newColName} onChange={e => setNewColName(e.target.value)} placeholder="New column name" className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-sky-400" />
+                                        <button onClick={() => {
+                                            if (!newColName.trim() || columns.includes(newColName.trim())) return;
+                                            setColumns([...columns, newColName.trim()]);
+                                            setNewColName("");
+                                        }} className="px-2 py-1 bg-sky-500 text-white text-xs rounded hover:bg-sky-600">Add</button>
+                                    </div>
+                                    <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1 px-1">Active Columns</div>
+                                    <div className="max-h-40 overflow-y-auto pr-1">
+                                        {columns.map(c => (
+                                            <div key={c} className="flex items-center justify-between px-1.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 rounded group/col">
+                                                <span className="truncate">{c}</span>
+                                                <button onClick={() => deleteCol(c)} className="opacity-0 group-hover/col:opacity-100 text-gray-400 hover:text-red-500"><XIcon size="w-3 h-3" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <button className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">Filters</button>
+                        
+                        <div className="relative">
+                            <button onClick={() => setShowSort(v => !v)} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm flex items-center gap-1">
+                                Sort {sortRule.col && <span className="text-sky-600 font-bold ml-1">({sortRule.col})</span>}
+                            </button>
+                            {showSort && (
+                                <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 shadow-xl rounded-lg z-20 overflow-hidden py-1">
+                                    {["Name", "Email", "Phone Number"].map(opt => (
+                                        <button key={opt} onClick={() => {
+                                            if (sortRule.col === opt) setSortRule({ col: opt, asc: !sortRule.asc });
+                                            else setSortRule({ col: opt, asc: true });
+                                            setShowSort(false);
+                                        }} className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                                            {opt}
+                                            {sortRule.col === opt && (
+                                                <span className="text-sky-500 font-bold">{sortRule.asc ? "↑" : "↓"}</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    {sortRule.col && (
+                                        <button onClick={() => { setSortRule({ col: "", asc: true }); setShowSort(false); }} className="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100 mt-1">
+                                            Clear sorting
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <button onClick={exportExcel} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">Export</button>
+                        <button className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">Save</button>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-max text-sm">
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <table style={{ minWidth: 'max-content', width: '100%' }} className="text-sm border-collapse border border-gray-300">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="w-10 px-4 py-2.5"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-sky-500" /></th>
+                            <tr className="bg-slate-50 border-b border-gray-300">
+                                <th className="w-8 px-2 py-1.5 border-r border-gray-300 bg-slate-50 sticky left-0 z-10"><input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-sky-500" /></th>
                                 {columns.map(h => (
-                                    <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
-                                        <div className="flex items-center gap-1 group">
-                                            {h}
-                                            <button onClick={() => deleteCol(h)} title="Remove column"
-                                                className="opacity-0 group-hover:opacity-100 ml-1 text-gray-400 hover:text-red-500 transition-opacity">
-                                                <XIcon size="w-3 h-3" />
-                                            </button>
-                                        </div>
+                                    <th key={h} className="px-3 py-1.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide whitespace-nowrap border-r border-gray-300">
+                                        {h}
                                     </th>
                                 ))}
-                                <th className="w-10 px-2 py-2.5"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map(c => (
-                                <tr key={c.id} className="border-b border-gray-100 hover:bg-sky-50/30 transition-colors group">
-                                    <td className="px-4 py-3"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-sky-500" /></td>
+                            {paginatedData.map((c: any) => (
+                                <tr key={c.id} className="border-b border-gray-200 hover:bg-sky-50/30 transition-colors group">
+                                    <td className="w-8 px-2 py-1.5 border-r border-gray-200 bg-white group-hover:bg-sky-50/30 sticky left-0 text-center align-middle transition-colors z-10"><input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-sky-500" /></td>
                                     {columns.map((col, ci) => (
-                                        <td key={col} className="px-4 py-3">
+                                        <td key={col} className="px-3 py-1.5 border-r border-gray-200 relative">
                                             {ci === 0 ? (
                                                 <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded-full overflow-hidden flex-shrink-0 border border-gray-200"><HubSpotLogoIcon /></div>
+                                                    <div className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0 border border-gray-200"><HubSpotLogoIcon /></div>
                                                     <EditableCell value={c[col] || "--"} onChange={v => update(c.id, col, v)} link className="text-sm font-medium" />
                                                 </div>
                                             ) : (
-                                                <EditableCell value={c[col] || "--"} onChange={v => update(c.id, col, v)} className="text-sm text-gray-400" />
+                                                <EditableCell value={c[col] || "--"} onChange={v => update(c.id, col, v)} className="text-sm text-gray-500" />
+                                            )}
+                                            {ci === columns.length - 1 && (
+                                                <button onClick={() => deleteRow(c.id)} title="Delete row"
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-red-50 bg-white border border-gray-200 shadow-sm z-10 flex items-center justify-center">
+                                                    <XIcon size="w-3.5 h-3.5" />
+                                                </button>
                                             )}
                                         </td>
                                     ))}
-                                    <td className="px-2 py-3">
-                                        <button onClick={() => deleteRow(c.id)} title="Delete row"
-                                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-red-50">
-                                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
-                                        </button>
-                                    </td>
                                 </tr>
                             ))}
-                            {filtered.length === 0 && (
-                                <tr><td colSpan={columns.length + 2} className="px-4 py-10 text-center text-sm text-gray-400">No contacts found.</td></tr>
+                            {paginatedData.length === 0 && (
+                                <tr><td colSpan={columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-400">No contacts found.</td></tr>
                             )}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 relative">
                     <div className="flex items-center gap-1">
-                        <button className="px-2.5 py-1 text-xs font-medium text-gray-400" disabled>‹ Prev</button>
-                        <button className="px-2.5 py-1 text-xs font-medium text-white rounded-md" style={{ background: "#0ea5e9" }}>1</button>
-                        <button className="px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700">Next ›</button>
+                        <button
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={safeCurrentPage === 1}
+                            className={`px-2.5 py-1 text-xs font-medium ${safeCurrentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                        >
+                            ‹ Prev
+                        </button>
+                        
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                            <button
+                                key={pageNum}
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${safeCurrentPage === pageNum ? 'text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                style={safeCurrentPage === pageNum ? { background: "#0ea5e9" } : {}}
+                            >
+                                {pageNum}
+                            </button>
+                        ))}
+                        
+                        <button
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={safeCurrentPage === totalPages}
+                            className={`px-2.5 py-1 text-xs font-medium ${safeCurrentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
+                        >
+                            Next ›
+                        </button>
                     </div>
-                    <button className="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">25 per page <ChevronDownIcon /></button>
+                    
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowPageSizeMenu(!showPageSizeMenu)}
+                            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                            {pageSize} per page <ChevronDownIcon />
+                        </button>
+                        {showPageSizeMenu && (
+                            <div className="absolute bottom-full right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-xl z-30 py-1 overflow-hidden" style={{ minWidth: '120px' }}>
+                                {[25, 50, 100].map(sz => (
+                                    <button 
+                                        key={sz} 
+                                        onClick={() => { setPageSize(sz); setShowPageSizeMenu(false); }}
+                                        className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                                    >
+                                        {sz} per page
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </>
@@ -912,22 +1031,49 @@ function CompaniesView({ onAgentStart, onAgentResult }: { onAgentStart?: () => v
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showImport, setShowImport] = useState(false);
 
+    // ── Pagination State ──
+    const [pageSize, setPageSize] = useState(25);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [showPageSizeMenu, setShowPageSizeMenu] = useState(false);
+
     const addBtnRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
     const [columns, setColumns] = useState<string[]>(() => {
-        try { const s = sessionStorage.getItem("custbuds_company_cols"); return s ? JSON.parse(s) : ["Company name", "Company owner", "Create Date (GMT +5:30)", "Phone Number", "City", "Company Size", "Annual Revenue"]; }
-        catch { return ["Company name", "Company owner", "Create Date (GMT +5:30)", "Phone Number", "City", "Company Size", "Annual Revenue"]; }
+        try { 
+            const s = localStorage.getItem("custbuds_company_cols"); 
+            let parsed = s ? JSON.parse(s) : ["Company name", "Create Date (IST)", "Email ID", "City", "Company Size", "Annual Revenue"]; 
+            return parsed.map((c: string) => {
+                if (c === "Phone Number" || c === "Email") return "Email ID";
+                if (c === "Create Date (GMT +5:30)") return "Create Date (IST)";
+                return c;
+            });
+        }
+        catch { return ["Company name", "Create Date (IST)", "Email ID", "City", "Company Size", "Annual Revenue"]; }
     });
 
     const [companies, setCompanies] = useState<TableRow[]>(() => {
         try {
-            const s = sessionStorage.getItem("custbuds_companies");
-            return s ? JSON.parse(s) : [{
-                id: 1, "Company name": "", "Company owner": "No owner",
-                "Create Date (GMT +5:30)": "Yesterday at 6:27 PM...",
-                "Phone Number": "--", "City": "--", "Company Size": "--", "Annual Revenue": "--",
-            }];
+            const s = localStorage.getItem("custbuds_companies");
+            if (!s) return [];
+            
+            const parsed = JSON.parse(s);
+            return parsed.map((c: any) => {
+                const migrated = { ...c };
+                if (migrated["Phone Number"] !== undefined) {
+                    migrated["Email ID"] = migrated["Phone Number"];
+                    delete migrated["Phone Number"];
+                }
+                if (migrated["Email"] !== undefined) {
+                    migrated["Email ID"] = migrated["Email"];
+                    delete migrated["Email"];
+                }
+                if (migrated["Create Date (GMT +5:30)"] !== undefined) {
+                    migrated["Create Date (IST)"] = migrated["Create Date (GMT +5:30)"];
+                    delete migrated["Create Date (GMT +5:30)"];
+                }
+                return migrated;
+            });
         } catch { return []; }
     });
 
@@ -947,12 +1093,11 @@ function CompaniesView({ onAgentStart, onAgentResult }: { onAgentStart?: () => v
             {
                 id: Date.now(),
                 "Company name": form.name || form.domain || "New Company",
-                "Company owner": form.owner || "No owner",
-                "Create Date (GMT +5:30)": "Just now",
-                "Phone Number": "--",
+                "Create Date (IST)": "Just now",
+                "Email ID": form.email || "--",
                 "City": form.city || "--",
                 "Company Size": form.companySize || "--",
-                "Annual Revenue": "--",
+                "Annual Revenue": form.revenue || "--",
             },
         ]);
     };
@@ -963,9 +1108,9 @@ function CompaniesView({ onAgentStart, onAgentResult }: { onAgentStart?: () => v
         setCompanies(cs => [...cs, ...newRows]);
     };
 
-    // Persist companies & columns to sessionStorage on every change
-    useEffect(() => { try { sessionStorage.setItem("custbuds_companies", JSON.stringify(companies)); } catch {} }, [companies]);
-    useEffect(() => { try { sessionStorage.setItem("custbuds_company_cols", JSON.stringify(columns)); } catch {} }, [columns]);
+    // Persist companies & columns to localStorage on every change
+    useEffect(() => { try { localStorage.setItem("custbuds_companies", JSON.stringify(companies)); } catch {} }, [companies]);
+    useEffect(() => { try { localStorage.setItem("custbuds_company_cols", JSON.stringify(columns)); } catch {} }, [columns]);
 
     useEffect(() => {
         const handler = (e: MouseEvent) => {
@@ -981,6 +1126,44 @@ function CompaniesView({ onAgentStart, onAgentResult }: { onAgentStart?: () => v
     const filtered = companies.filter(c =>
         !tableSearch || (c["Company name"] || "").toLowerCase().includes(tableSearch.toLowerCase())
     );
+
+    const [sortRule, setSortRule] = useState<{ col: string, asc: boolean }>({ col: "", asc: true });
+    const [showSort, setShowSort] = useState(false);
+    const [showEditCols, setShowEditCols] = useState(false);
+    const [newColName, setNewColName] = useState("");
+
+    const exportExcel = () => {
+        const header = ["id", ...columns].join(",");
+        const rows = companies.map(c => [c.id, ...columns.map(col => `"${String(c[col] || "").replace(/"/g, '""')}"`)].join(","));
+        const csv = [header, ...rows].join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "companies_export.csv";
+        a.click();
+    };
+
+    const sortedFiltered = useMemo(() => {
+        let res = [...filtered];
+        if (sortRule.col) {
+            res.sort((a, b) => {
+                const av = String(a[sortRule.col] || "");
+                const bv = String(b[sortRule.col] || "");
+                return sortRule.asc ? av.localeCompare(bv) : bv.localeCompare(av);
+            });
+        }
+        return res;
+    }, [filtered, sortRule]);
+
+    const totalPages = Math.max(1, Math.ceil(sortedFiltered.length / pageSize));
+    const safeCurrentPage = Math.min(currentPage, totalPages);
+    
+    useEffect(() => {
+        if (currentPage !== safeCurrentPage) setCurrentPage(safeCurrentPage);
+    }, [safeCurrentPage, currentPage]);
+
+    const paginatedData = sortedFiltered.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize);
 
     return (
         <>
@@ -1063,93 +1246,164 @@ function CompaniesView({ onAgentStart, onAgentResult }: { onAgentStart?: () => v
                         Table view <ChevronDownIcon />
                     </button>
                     <div className="flex items-center gap-1.5 ml-auto">
-                        {["Edit columns", "Filters", "Sort", "Export", "Save"].map((l) => (
-                            <button
-                                key={l}
-                                className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
-                            >
-                                {l}
+                        <div className="relative">
+                            <button onClick={() => setShowEditCols(v => !v)} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">
+                                Edit columns
                             </button>
-                        ))}
+                            {showEditCols && (
+                                <div className="absolute right-0 mt-1 w-56 bg-white border border-gray-200 shadow-xl rounded-lg z-20 p-2">
+                                    <div className="flex gap-1 mb-2">
+                                        <input value={newColName} onChange={e => setNewColName(e.target.value)} placeholder="New column name" className="flex-1 border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-sky-400" />
+                                        <button onClick={() => {
+                                            if (!newColName.trim() || columns.includes(newColName.trim())) return;
+                                            setColumns([...columns, newColName.trim()]);
+                                            setNewColName("");
+                                        }} className="px-2 py-1 bg-sky-500 text-white text-xs rounded hover:bg-sky-600">Add</button>
+                                    </div>
+                                    <div className="text-[10px] text-gray-400 uppercase font-bold tracking-wider mb-1 px-1">Active Columns</div>
+                                    <div className="max-h-40 overflow-y-auto pr-1">
+                                        {columns.map(c => (
+                                            <div key={c} className="flex items-center justify-between px-1.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 rounded group/col">
+                                                <span className="truncate">{c}</span>
+                                                <button onClick={() => deleteCol(c)} className="opacity-0 group-hover/col:opacity-100 text-gray-400 hover:text-red-500"><XIcon size="w-3 h-3" /></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <button className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">Filters</button>
+                        
+                        <div className="relative">
+                            <button onClick={() => setShowSort(v => !v)} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm flex items-center gap-1">
+                                Sort {sortRule.col && <span className="text-sky-600 font-bold ml-1">({sortRule.col})</span>}
+                            </button>
+                            {showSort && (
+                                <div className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 shadow-xl rounded-lg z-20 overflow-hidden py-1">
+                                    {["Annual Revenue", "Company name", "Create Date (IST)"].map(opt => (
+                                        <button key={opt} onClick={() => {
+                                            if (sortRule.col === opt) setSortRule({ col: opt, asc: !sortRule.asc });
+                                            else setSortRule({ col: opt, asc: true });
+                                            setShowSort(false);
+                                        }} className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-between">
+                                            {opt}
+                                            {sortRule.col === opt && (
+                                                <span className="text-sky-500 font-bold">{sortRule.asc ? "↑" : "↓"}</span>
+                                            )}
+                                        </button>
+                                    ))}
+                                    {sortRule.col && (
+                                        <button onClick={() => { setSortRule({ col: "", asc: true }); setShowSort(false); }} className="w-full text-left px-3 py-2 text-xs text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100 mt-1">
+                                            Clear sorting
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        <button onClick={exportExcel} className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">Export</button>
+                        <button className="px-2.5 py-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 bg-white shadow-sm">Save</button>
                     </div>
                 </div>
 
-                <div className="overflow-x-auto border-t border-gray-100">
-                    <table className="w-full min-w-max text-sm">
+                <div style={{ overflowX: 'auto', width: '100%' }}>
+                    <table style={{ minWidth: 'max-content', width: '100%' }} className="text-sm border-collapse border border-gray-300">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200">
-                                <th className="w-10 px-4 py-2.5"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-sky-500" /></th>
+                            <tr className="bg-slate-50 border-b border-gray-300">
+                                <th className="w-8 px-2 py-1.5 border-r border-gray-300 bg-slate-50 sticky left-0 z-10"><input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-sky-500" /></th>
                                 {columns.map(h => (
-                                    <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide whitespace-nowrap">
-                                        <div className="flex items-center gap-1 group">
-                                            {h}
-                                            <button onClick={() => deleteCol(h)} title="Remove column"
-                                                className="opacity-0 group-hover:opacity-100 ml-1 text-gray-400 hover:text-red-500 transition-opacity">
-                                                <XIcon size="w-3 h-3" />
-                                            </button>
-                                        </div>
+                                    <th key={h} className="px-3 py-1.5 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide whitespace-nowrap border-r border-gray-300">
+                                        {h}
                                     </th>
                                 ))}
-                                <th className="w-10 px-2 py-2.5"></th>
+                                <th className="w-8 px-2 py-1.5"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filtered.map(company => (
-                                <tr key={company.id} className="border-b border-gray-100 hover:bg-sky-50/30 transition-colors group">
-                                    <td className="px-4 py-3"><input type="checkbox" className="w-3.5 h-3.5 rounded border-gray-300 accent-sky-500" /></td>
+                            {paginatedData.map((company: any) => (
+                                <tr key={company.id} className="border-b border-gray-200 hover:bg-sky-50/30 transition-colors group">
+                                    <td className="w-8 px-2 py-1.5 border-r border-gray-200 bg-white group-hover:bg-sky-50/30 sticky left-0 text-center align-middle transition-colors z-10"><input type="checkbox" className="w-3.5 h-3.5 rounded-sm border-gray-300 accent-sky-500" /></td>
                                     {columns.map((col, ci) => (
-                                        <td key={col} className="px-4 py-3">
+                                        <td key={col} className="px-3 py-1.5 border-r border-gray-200 relative">
                                             {ci === 0 ? (
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0 text-white text-xs font-bold" style={{ background: "#0ea5e9" }}>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="w-5 h-5 text-[10px] rounded flex items-center justify-center flex-shrink-0 text-white font-bold" style={{ background: "#0ea5e9" }}>
                                                         {(company[col] || "?")[0].toUpperCase()}
                                                     </div>
                                                     <EditableCell value={company[col] || "--"} onChange={v => update(company.id, col, v)} className="text-sm font-medium text-gray-900" />
                                                 </div>
                                             ) : (
-                                                <EditableCell value={company[col] || "--"} onChange={v => update(company.id, col, v)} className="text-sm text-gray-400" />
+                                                <EditableCell value={company[col] || "--"} onChange={v => update(company.id, col, v)} className="text-sm text-gray-500" />
+                                            )}
+                                            {ci === columns.length - 1 && (
+                                                <button onClick={() => deleteRow(company.id)} title="Delete row"
+                                                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-red-50 bg-white border border-gray-200 shadow-sm z-10 flex items-center justify-center">
+                                                    <XIcon size="w-3.5 h-3.5" />
+                                                </button>
                                             )}
                                         </td>
                                     ))}
-                                    <td className="px-2 py-3">
-                                        <button onClick={() => deleteRow(company.id)} title="Delete row"
-                                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1 rounded hover:bg-red-50">
-                                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clipRule="evenodd" /></svg>
-                                        </button>
-                                    </td>
                                 </tr>
                             ))}
-                            <tr>
-                                <td colSpan={columns.length + 2} className="px-4 py-4 text-center text-xs text-gray-400">
-                                    Showing {filtered.length} {filtered.length === 1 ? "company" : "companies"} ·{" "}
-                                    <span onClick={() => setShowImport(true)} className="text-sky-500 cursor-pointer hover:underline">Import more</span>
-                                </td>
-                            </tr>
+                            {paginatedData.length === 0 && (
+                                <tr><td colSpan={columns.length + 1} className="px-4 py-10 text-center text-sm text-gray-400">No companies found.</td></tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
 
-                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100">
+                <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 relative">
                     <div className="flex items-center gap-1">
                         <button
-                            className="px-2.5 py-1 text-xs font-medium text-gray-400"
-                            disabled
+                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                            disabled={safeCurrentPage === 1}
+                            className={`px-2.5 py-1 text-xs font-medium ${safeCurrentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
                         >
                             ‹ Prev
                         </button>
+                        
+                        {Array.from({ length: totalPages }, (_, i) => i + 1).map(pageNum => (
+                            <button
+                                key={pageNum}
+                                onClick={() => setCurrentPage(pageNum)}
+                                className={`px-2.5 py-1 text-xs font-medium rounded-md transition-colors ${safeCurrentPage === pageNum ? 'text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'}`}
+                                style={safeCurrentPage === pageNum ? { background: "#0ea5e9" } : {}}
+                            >
+                                {pageNum}
+                            </button>
+                        ))}
+                        
                         <button
-                            className="px-2.5 py-1 text-xs font-medium text-white rounded-md"
-                            style={{ background: "#0ea5e9" }}
+                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                            disabled={safeCurrentPage === totalPages}
+                            className={`px-2.5 py-1 text-xs font-medium ${safeCurrentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-600 hover:text-gray-900'}`}
                         >
-                            1
-                        </button>
-                        <button className="px-2.5 py-1 text-xs font-medium text-gray-500 hover:text-gray-700">
                             Next ›
                         </button>
                     </div>
-                    <button className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
-                        25 per page <ChevronDownIcon />
-                    </button>
+                    
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowPageSizeMenu(!showPageSizeMenu)}
+                            className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50"
+                        >
+                            {pageSize} per page <ChevronDownIcon />
+                        </button>
+                        {showPageSizeMenu && (
+                            <div className="absolute bottom-full right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-xl z-30 py-1 overflow-hidden" style={{ minWidth: '120px' }}>
+                                {[25, 50, 100].map(sz => (
+                                    <button 
+                                        key={sz} 
+                                        onClick={() => { setPageSize(sz); setShowPageSizeMenu(false); }}
+                                        className="w-full text-left px-4 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                                    >
+                                        {sz} per page
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </>
@@ -1203,18 +1457,47 @@ function SectionHeader({ title, description, action }: { title: string; descript
 }
 
 /* ───────── 1. Prospecting Agent View ───────── */
-function ProspectingAgentView() {
+function ProspectingAgentView({ agentResults = [], onProspectAll }: { agentResults?: AgentResult[], onProspectAll?: () => void }) {
     const [selectedTarget, setSelectedTarget] = useState<number | null>(null);
-
-    const targets = [
-        { id: 1, name: "Rahul Mehta", title: "VP Engineering", company: "Zomato", score: 94, status: "Sequence Active", stage: "Email 3/5", signals: ["Hired 3 engineers", "Raised Series C"], email: "rahul.m@zomato.com", lastActivity: "2h ago" },
-        { id: 2, name: "Priya Sharma", title: "Head of Growth", company: "Razorpay", score: 88, status: "Researching", stage: "Pending", signals: ["Attended SaaS Summit", "Posted on LinkedIn"], email: "priya.s@razorpay.com", lastActivity: "5h ago" },
-        { id: 3, name: "Arjun Nair", title: "CTO", company: "Swiggy", score: 81, status: "Awaiting Reply", stage: "Email 1/5", signals: ["New tech stack adoption", "Q4 budget cycle"], email: "arjun@swiggy.in", lastActivity: "1d ago" },
-        { id: 4, name: "Kavya Reddy", title: "Director of Sales", company: "Freshworks", score: 76, status: "Sequence Active", stage: "LinkedIn 2/3", signals: ["Job change 6mo ago", "Product review posted"], email: "kavya.r@freshworks.com", lastActivity: "3h ago" },
-        { id: 5, name: "Siddharth Joshi", title: "Founder & CEO", company: "Khatabook", score: 71, status: "Researching", stage: "Pending", signals: ["Funding announcement", "Hiring SDRs"], email: "sid@khatabook.com", lastActivity: "2d ago" },
-    ];
+    const [emailTab, setEmailTab] = useState<'email1' | 'email2'>('email1');
+    const [editedEmail1, setEditedEmail1] = useState('');
+    const [editedEmail2, setEditedEmail2] = useState('');
+    const [forwardTo, setForwardTo] = useState('');
+    const [forwarded, setForwarded] = useState(false);
 
     const scoreColor = (s: number) => s >= 90 ? "#22c55e" : s >= 75 ? "#f59e0b" : "#94a3b8";
+
+    // Compute stats from actual data
+    const targetsResearched = agentResults.length;
+    const sequencesActive = agentResults.filter(r => r.email1 || r.email2).length;
+    const avgFitScore = agentResults.length > 0
+        ? Math.round(agentResults.reduce((sum, r) => sum + (r.fitScore || 0), 0) / agentResults.length)
+        : 0;
+
+    // Build activity log from actual results
+    const activityLog = agentResults.map((r, i) => ({
+        time: `${i + 1}m ago`,
+        action: `Researched ${r.enrichedProfile?.key_contact?.name || 'target'} (${r.companyName}) · Score: ${r.fitScore}`,
+        color: "#6366f1",
+    }));
+
+    const openTarget = (idx: number) => {
+        const t = agentResults[idx];
+        setEmailTab('email1');
+        setEditedEmail1(t.email1 || '');
+        setEditedEmail2(t.email2 || '');
+        setForwardTo('');
+        setForwarded(false);
+        setSelectedTarget(selectedTarget === idx ? null : idx);
+    };
+
+    const handleForward = (emailBody: string) => {
+        if (!forwardTo.trim()) return;
+        const subject = encodeURIComponent(`Outreach from CustBuds`);
+        const body = encodeURIComponent(emailBody);
+        window.open(`mailto:${forwardTo.trim()}?subject=${subject}&body=${body}`, '_blank');
+        setForwarded(true);
+    };
 
     return (
         <div className="space-y-6">
@@ -1231,126 +1514,176 @@ function ProspectingAgentView() {
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
-                        <AgentStatusBadge status="running" />
-                        <button className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg hover:opacity-90" style={{ background: "#6366f1" }}>+ Add Targets</button>
+                        <AgentStatusBadge status={agentResults.length > 0 ? "running" : "idle"} />
+                        {onProspectAll && (
+                            <button
+                                onClick={onProspectAll}
+                                className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg hover:opacity-90 transition-opacity flex items-center gap-1.5"
+                                style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}
+                            >
+                                <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" /></svg>
+                                Prospect All
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Metrics */}
+            {/* Metrics — computed from real data */}
             <div className="flex gap-4 flex-wrap">
-                <MetricCard label="Targets Researched" value="142" delta="18 this week" deltaUp />
-                <MetricCard label="Sequences Active" value="38" delta="5 new today" deltaUp />
-                <MetricCard label="Avg. Fit Score" value="79" sub="/ 100" />
-                <MetricCard label="Reply Rate" value="24%" delta="3.2% vs last month" deltaUp />
-                <MetricCard label="Meetings Booked" value="11" delta="2 today" deltaUp />
+                <MetricCard label="Targets Researched" value={String(targetsResearched)} sub={targetsResearched === 0 ? "No targets yet" : `${targetsResearched} processed`} />
+                <MetricCard label="Sequences Active" value={String(sequencesActive)} sub={sequencesActive === 0 ? "None active" : `${sequencesActive} ready`} />
+                <MetricCard label="Avg. Fit Score" value={avgFitScore > 0 ? String(avgFitScore) : "—"} sub="/ 100" />
+                <MetricCard label="Reply Rate" value="—" sub="No data yet" />
+                <MetricCard label="Meetings Booked" value="—" sub="No data yet" />
             </div>
 
-            {/* Target Table */}
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <SectionHeader
-                    title="Target Queue"
-                    description="Agent-researched prospects ranked by fit score"
-                    action={<span className="text-xs text-gray-400">Auto-refreshes every 30 min</span>}
-                />
-                <div className="px-6 pb-2">
-                    <table className="w-full text-sm">
-                        <thead>
-                            <tr className="border-b border-gray-100">
-                                {["Prospect", "Company", "Fit Score", "Status", "Stage", "Intent Signals", "Last Activity"].map(h => (
-                                    <th key={h} className="py-2.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pr-4">{h}</th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {targets.map(t => (
-                                <tr key={t.id} onClick={() => setSelectedTarget(selectedTarget === t.id ? null : t.id)}
-                                    className="border-b border-gray-50 hover:bg-indigo-50/30 cursor-pointer transition-colors">
-                                    <td className="py-3 pr-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: "linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
-                                                {t.name[0]}
-                                            </div>
-                                            <div>
-                                                <div className="font-semibold text-gray-900 text-xs">{t.name}</div>
-                                                <div className="text-xs text-gray-400">{t.title}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td className="py-3 pr-4 text-xs font-medium text-gray-700">{t.company}</td>
-                                    <td className="py-3 pr-4">
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
-                                                <div className="h-full rounded-full" style={{ width: `${t.score}%`, background: scoreColor(t.score) }} />
-                                            </div>
-                                            <span className="text-xs font-bold" style={{ color: scoreColor(t.score) }}>{t.score}</span>
-                                        </div>
-                                    </td>
-                                    <td className="py-3 pr-4">
-                                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                                            t.status === "Sequence Active" ? "bg-green-50 text-green-700" :
-                                            t.status === "Awaiting Reply" ? "bg-amber-50 text-amber-700" : "bg-indigo-50 text-indigo-700"
-                                        }`}>{t.status}</span>
-                                    </td>
-                                    <td className="py-3 pr-4 text-xs text-gray-500">{t.stage}</td>
-                                    <td className="py-3 pr-4">
-                                        <div className="flex flex-col gap-0.5">
-                                            {t.signals.map(s => <span key={s} className="text-xs text-gray-500">• {s}</span>)}
-                                        </div>
-                                    </td>
-                                    <td className="py-3 text-xs text-gray-400">{t.lastActivity}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* Target Queue */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden min-h-[400px]">
+                <div className="px-6 pt-5 pb-3">
+                    <SectionHeader
+                        title="Target Queue"
+                        description="Dynamically populated with targets processed by the AI Agent in this session"
+                    />
                 </div>
-                {selectedTarget && (() => {
-                    const t = targets.find(x => x.id === selectedTarget)!;
-                    return (
-                        <div className="mx-6 mb-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-                            <div className="flex items-center justify-between mb-3">
-                                <span className="text-sm font-bold text-indigo-800">AI-Generated Outreach for {t.name}</span>
-                                <button onClick={(e) => { e.stopPropagation(); setSelectedTarget(null); }} className="text-indigo-400 hover:text-indigo-600"><XIcon size="w-4 h-4" /></button>
-                            </div>
-                            <div className="bg-white rounded-lg p-3 text-xs text-gray-700 leading-relaxed border border-indigo-100">
-                                <p className="font-semibold text-gray-800 mb-1">Subject: Quick question about {t.company}'s growth plans</p>
-                                <p>Hi {t.name.split(" ")[0]},</p>
-                                <br />
-                                <p>Noticed {t.company} recently {t.signals[0].toLowerCase()} — congrats! At CustBuds, we've helped similar-stage companies accelerate pipeline by 30-40% with AI-driven prospecting.</p>
-                                <br />
-                                <p>Worth a 15-min chat? Happy to show you exactly how we'd approach {t.company}'s context.</p>
-                                <br />
-                                <p>Best,<br />Shlok @ CustBuds</p>
-                            </div>
-                            <div className="flex gap-2 mt-3">
-                                <button className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg" style={{ background: "#6366f1" }}>Send Now</button>
-                                <button className="px-3 py-1.5 text-xs font-medium text-indigo-700 bg-white border border-indigo-200 rounded-lg hover:bg-indigo-50">Regenerate</button>
-                                <button className="px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">Schedule</button>
-                            </div>
+
+                {agentResults.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-24 text-center">
+                        <div className="w-12 h-12 bg-sky-50 rounded-full flex items-center justify-center mb-4 text-sky-500">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>
                         </div>
-                    );
-                })()}
+                        <h3 className="text-sm font-semibold text-gray-900 mb-1">Queue is empty</h3>
+                        <p className="text-xs text-gray-500 max-w-sm">No companies have been prospected yet. Go to the CRM → Companies tab and click "Create + Prospect" to generate targeted outreach!</p>
+                    </div>
+                ) : (
+                    <div className="px-6 pb-2">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-gray-100">
+                                    {["Prospect", "Company", "Fit Score", "Status", "Stage"].map(h => (
+                                        <th key={h} className="py-2.5 text-left text-xs font-semibold text-gray-400 uppercase tracking-wide pr-4">{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {agentResults.map((t, idx) => {
+                                    const contactName = t.enrichedProfile?.key_contact?.name || "Target";
+                                    const contactTitle = t.enrichedProfile?.key_contact?.title || "Leadership";
+                                    const cName = t.companyName || "Unknown";
+                                    const isSelected = selectedTarget === idx;
+
+                                    return (
+                                        <React.Fragment key={idx}>
+                                            <tr onClick={() => openTarget(idx)}
+                                                className={`border-b border-gray-50 cursor-pointer transition-colors ${isSelected ? 'bg-sky-50/50' : 'hover:bg-slate-50'}`}>
+                                                <td className="py-3 pr-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="w-7 h-7 rounded-sm flex items-center justify-center text-white text-xs font-bold flex-shrink-0 bg-sky-500">
+                                                            {contactName.charAt(0)}
+                                                        </div>
+                                                        <div>
+                                                            <div className="font-semibold text-gray-900 text-xs">{contactName}</div>
+                                                            <div className="text-xs text-gray-400">{contactTitle}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 pr-4 text-xs font-semibold text-sky-700">{cName}</td>
+                                                <td className="py-3 pr-4">
+                                                    <div className="flex items-center gap-2">
+                                                        <div className="h-1.5 w-16 bg-gray-100 rounded-full overflow-hidden">
+                                                            <div className="h-full rounded-full" style={{ width: `${t.fitScore}%`, background: scoreColor(t.fitScore) }} />
+                                                        </div>
+                                                        <span className="text-xs font-bold" style={{ color: scoreColor(t.fitScore) }}>{t.fitScore}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-3 pr-4">
+                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-700">Processed</span>
+                                                </td>
+                                                <td className="py-3 pr-4 text-xs text-slate-500">Sequence Ready</td>
+                                            </tr>
+
+                                            {isSelected && (
+                                                <tr>
+                                                    <td colSpan={5} className="bg-sky-50/30 p-0 border-b border-gray-100">
+                                                        <div className="p-4 mx-6 my-2 bg-white rounded-xl shadow-sm border border-sky-100">
+                                                            <div className="flex items-center justify-between mb-3 border-b border-gray-100 pb-2">
+                                                                <span className="text-xs font-bold text-gray-800 uppercase tracking-wide">AI Outreach Sequence — {contactName.split(" ")[0]}</span>
+                                                                <button onClick={(e) => { e.stopPropagation(); setSelectedTarget(null); }} className="text-gray-400 hover:text-gray-600"><XIcon size="w-4 h-4" /></button>
+                                                            </div>
+
+                                                            {/* Tab switcher */}
+                                                            <div className="flex gap-2 mb-3">
+                                                                {(['email1', 'email2'] as const).map(tab => (
+                                                                    <button key={tab} onClick={(e) => { e.stopPropagation(); setEmailTab(tab); }}
+                                                                        className={`px-3 py-1 text-xs font-semibold rounded-md transition-colors ${emailTab === tab ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                                                                        {tab === 'email1' ? 'Email 1' : 'Email 2 (Follow-up)'}
+                                                                    </button>
+                                                                ))}
+                                                            </div>
+
+                                                            {/* Editable email body */}
+                                                            <textarea
+                                                                onClick={e => e.stopPropagation()}
+                                                                value={emailTab === 'email1' ? editedEmail1 : editedEmail2}
+                                                                onChange={e => emailTab === 'email1' ? setEditedEmail1(e.target.value) : setEditedEmail2(e.target.value)}
+                                                                className="w-full h-52 text-xs text-gray-700 bg-slate-50 border border-slate-200 rounded p-3 resize-y focus:outline-none focus:border-sky-400 leading-relaxed font-mono"
+                                                            />
+
+                                                            {/* Forward section */}
+                                                            <div className="mt-3 flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                                                <input
+                                                                    type="email"
+                                                                    value={forwardTo}
+                                                                    onChange={e => { setForwardTo(e.target.value); setForwarded(false); }}
+                                                                    placeholder="Recipient email address..."
+                                                                    className="flex-1 text-xs border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:border-sky-400"
+                                                                />
+                                                                <button
+                                                                    onClick={() => handleForward(emailTab === 'email1' ? editedEmail1 : editedEmail2)}
+                                                                    className={`px-4 py-1.5 text-xs font-semibold rounded transition-colors flex items-center gap-1.5 ${forwarded ? 'bg-green-500 text-white' : 'bg-sky-500 text-white hover:bg-sky-600'}`}
+                                                                >
+                                                                    <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
+                                                                    {forwarded ? 'Sent ✓' : 'Send Email'}
+                                                                </button>
+                                                                <button onClick={(e) => { e.stopPropagation(); setSelectedTarget(null); }}
+                                                                    className="px-4 py-1.5 text-xs font-semibold text-slate-600 bg-white border border-slate-200 rounded hover:bg-slate-50 transition-colors">
+                                                                    Discard
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
 
-            {/* Agent Activity Log */}
+            {/* Agent Activity Log — dynamic */}
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm px-6 py-5">
                 <SectionHeader title="Agent Activity Log" description="Real-time actions taken by the Prospecting Agent" />
-                <div className="space-y-2">
-                    {[
-                        { time: "2 min ago", action: "Researched Rahul Mehta (Zomato) via LinkedIn + Crunchbase · Score: 94", color: "#6366f1" },
-                        { time: "14 min ago", action: "Sent Email 3/5 to Arjun Nair · Subject: 'Swiggy's tech stack evolution'", color: "#22c55e" },
-                        { time: "31 min ago", action: "Adjusted messaging for Kavya Reddy after LinkedIn post engagement", color: "#f59e0b" },
-                        { time: "1h ago", action: "Added 8 new prospects from Freshworks hiring page", color: "#6366f1" },
-                        { time: "2h ago", action: "Booked meeting with Priti Kapoor (Meesho) · Sequence step 4 triggered", color: "#22c55e" },
-                        { time: "3h ago", action: "Paused sequence for Mohit Gupta — competitor mention detected in reply", color: "#ef4444" },
-                    ].map((l, i) => (
-                        <div key={i} className="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
-                            <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: l.color }} />
-                            <div className="flex-1 text-xs text-gray-700">{l.action}</div>
-                            <span className="text-xs text-gray-400 flex-shrink-0">{l.time}</span>
+                {activityLog.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-center">
+                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mb-3 text-gray-400">
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" /></svg>
                         </div>
-                    ))}
-                </div>
+                        <p className="text-xs text-gray-400">No activity found. Prospect a company to see agent logs here.</p>
+                    </div>
+                ) : (
+                    <div className="space-y-2">
+                        {activityLog.map((l, i) => (
+                            <div key={i} className="flex items-start gap-3 py-2 border-b border-gray-50 last:border-0">
+                                <div className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0" style={{ background: l.color }} />
+                                <div className="flex-1 text-xs text-gray-700">{l.action}</div>
+                                <span className="text-xs text-gray-400 flex-shrink-0">{l.time}</span>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -1778,6 +2111,18 @@ function CompetitiveIntelligenceView() {
     );
 }
 
+function PlaceholderView({ title, desc }: { title: string; desc: string }) {
+    return (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-center px-4">
+            <div className="w-16 h-16 bg-sky-100 text-sky-500 rounded-full flex items-center justify-center mb-4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-8 h-8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{title}</h2>
+            <p className="text-sm text-gray-500 max-w-sm">{desc}</p>
+        </div>
+    );
+}
+
 /* ───────── Root Dashboard ───────── */
 export default function CRMDashboard() {
     const [bannerVisible, setBannerVisible] = useState(true);
@@ -1788,25 +2133,45 @@ export default function CRMDashboard() {
     // isProspecting: true while we're waiting for the backend to respond
     const [isProspecting, setIsProspecting] = useState(false);
     // agentResult: populated once the backend returns
+    const [agentResults, setAgentResults] = useState<AgentResult[]>(() => {
+        try { const s = localStorage.getItem("custbuds_agent_results"); return s ? JSON.parse(s) : []; }
+        catch { return []; }
+    });
+    useEffect(() => { try { localStorage.setItem("custbuds_agent_results", JSON.stringify(agentResults)); } catch {} }, [agentResults]);
     const [agentResult, setAgentResult] = useState<AgentResult | null>(null);
+
+    // ── Avatar Options ──
+    const accounts = [
+        { name: "Shlok Parekh", email: "shlok@custbuds.com", color: "#0ea5e9" },
+        { name: "Sales Team", email: "sales@custbuds.com", color: "#f59e0b" },
+        { name: "Demo User", email: "demo@custbuds.com", color: "#10b981" },
+    ];
+    const [activeAccount, setActiveAccount] = useState(accounts[0]);
+    const [showAccountMenu, setShowAccountMenu] = useState(false);
+    
+    const accountMenuRef = useRef<HTMLDivElement>(null);
+    const accountBtnRef = useRef<HTMLButtonElement>(null);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (accountMenuRef.current && !accountMenuRef.current.contains(e.target as Node) &&
+                accountBtnRef.current && !accountBtnRef.current.contains(e.target as Node)
+            ) setShowAccountMenu(false);
+        };
+        document.addEventListener("mousedown", handler);
+        return () => document.removeEventListener("mousedown", handler);
+    }, []);
 
     /**
      * handleAgentResult
      * Called by CreateCompanyModal (via CompaniesView) after the backend
      * returns the AI-generated prospecting result.
-     *
-     * Data-flow recap:
-     *   CreateCompanyModal -> fetch(/api/agent/prospect)
-     *     -> returns AgentResult JSON
-     *     -> calls onAgentResult(data)
-     *     -> CompaniesView passes it up to this handler
-     *     -> we store it in state -> AgentResultPanel renders
      */
     const handleAgentResult = (result: AgentResult | null) => {
         setIsProspecting(false);
         if (result) {
             setAgentResult(result);
-            // Switch to companies view so the user sees the result right away
+            setAgentResults(prev => [result, ...prev]);
             setActiveNav("companies");
         }
     };
@@ -1818,15 +2183,73 @@ export default function CRMDashboard() {
         setActiveNav("companies");
     };
 
+    // ── Prospect All: iterate over all saved companies and prospect each ──
+    const handleProspectAll = async () => {
+        let companies: any[] = [];
+        try { const s = localStorage.getItem("custbuds_companies"); if (s) companies = JSON.parse(s); } catch {}
+        if (companies.length === 0) return;
+
+        setIsProspecting(true);
+        setActiveNav("prospecting");
+
+        for (const company of companies) {
+            const name = company["Company name"] || company.name || "";
+            const domain = company.domain || "";
+            if (!name && !domain) continue;
+            try {
+                const res = await fetch("http://localhost:5000/api/prospect", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ companyName: name, domain }),
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const result: AgentResult = { ...data, companyName: name };
+                    setAgentResults(prev => [result, ...prev]);
+                    setAgentResult(result);
+                }
+            } catch {}
+        }
+        setIsProspecting(false);
+    };
+
+    // ── Interactive Gmail Connect State ──
+    const [isConnectingGmail, setIsConnectingGmail] = useState(false);
+    const [isGmailConnected, setIsGmailConnected] = useState(false);
+
+    const handleConnectGmail = () => {
+        setIsConnectingGmail(true);
+        // Simulate OAuth wait
+        setTimeout(() => {
+            setIsConnectingGmail(false);
+            setIsGmailConnected(true);
+            // Hide banner after 2 seconds of showing connected state
+            setTimeout(() => setBannerVisible(false), 2000);
+        }, 1500);
+    };
+
     const crmNav = [
         { id: "contacts", label: "Contacts", icon: <ContactsIcon /> },
         { id: "companies", label: "Companies", icon: <CompaniesIcon /> },
+        { id: "deals", label: "Deals", icon: <DealsIcon /> },
     ];
+    
+    const activitiesNav = [
+        { id: "meetings", label: "Meetings", icon: <MeetingsIcon /> },
+        { id: "calls", label: "Calls", icon: <CallsIcon /> },
+    ];
+    
+    // Upgraded Agent SVGs
+    const SparklesIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 3l1.912 5.813a2 2 0 001.275 1.275L21 12l-5.813 1.912a2 2 0 00-1.275 1.275L12 21l-1.912-5.813a2 2 0 00-1.275-1.275L3 12l5.813-1.912a2 2 0 001.275-1.275L12 3z"/></svg>;
+    const TargetIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>;
+    const ShieldIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>;
+    const EyeIcon = <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>;
+
     const agentNav = [
-        { id: "prospecting", label: "Prospecting",    grad: "#6366f1,#8b5cf6" },
-        { id: "deal-intel",  label: "Deal Intel",     grad: "#f59e0b,#ef4444" },
-        { id: "retention",   label: "Retention",      grad: "#06b6d4,#6366f1" },
-        { id: "competitive", label: "Competitive",    grad: "#10b981,#06b6d4" },
+        { id: "prospecting", label: "Prospecting",    icon: SparklesIcon },
+        { id: "deal-intel",  label: "Deal Intel",     icon: TargetIcon },
+        { id: "retention",   label: "Retention",      icon: ShieldIcon },
+        { id: "competitive", label: "Competitive",    icon: EyeIcon },
     ];
 
     const NavBtn = ({ id, label, icon, grad }: { id: string; label: string; icon?: React.ReactNode; grad?: string }) => {
@@ -1840,7 +2263,7 @@ export default function CRMDashboard() {
                         <svg viewBox="0 0 8 8" fill="white" className="w-2.5 h-2.5"><circle cx="4" cy="4" r="2" /></svg>
                     </span>
                 ) : (
-                    <span className={isActive ? "text-white" : "text-gray-400"}>{icon}</span>
+                    <span className={isActive ? "text-white" : "text-sky-300 opacity-80 group-hover:opacity-100"}>{icon}</span>
                 )}
                 {label}
             </button>
@@ -1865,6 +2288,10 @@ export default function CRMDashboard() {
                 <nav className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto">
                     <div className="text-xs font-semibold text-gray-500 px-3 pb-1 uppercase tracking-wider">CRM</div>
                     {crmNav.map(item => <NavBtn key={item.id} {...item} />)}
+                    
+                    <div className="text-xs font-semibold text-gray-500 px-3 pt-4 pb-1 uppercase tracking-wider">Activities</div>
+                    {activitiesNav.map(item => <NavBtn key={item.id} {...item} />)}
+
                     <div className="text-xs font-semibold text-gray-500 px-3 pt-4 pb-1 uppercase tracking-wider">AI Agents</div>
                     {agentNav.map(item => <NavBtn key={item.id} {...item} />)}
                 </nav>
@@ -1895,17 +2322,59 @@ export default function CRMDashboard() {
                             />
                         </div>
                     </div>
-                    <div className="w-36 flex justify-end">
-                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-300 hover:bg-white/5 transition-colors border border-white/10">
+                    <div className="w-48 flex justify-end relative">
+                        <button 
+                            ref={accountBtnRef}
+                            onClick={() => setShowAccountMenu(v => !v)}
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-gray-300 hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
+                        >
                             <div
-                                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
-                                style={{ background: "#0ea5e9" }}
+                                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-sm"
+                                style={{ background: activeAccount.color }}
                             >
-                                A
+                                {activeAccount.name.charAt(0)}
                             </div>
-                            <span className="text-xs font-medium">Avataar</span>
+                            <div className="flex flex-col items-start leading-tight">
+                                <span className="text-[11px] font-semibold text-white">{activeAccount.name}</span>
+                                <span className="text-[10px] text-gray-400 opacity-80">{activeAccount.email.split('@')[0]}</span>
+                            </div>
                             <ChevronDownIcon />
                         </button>
+
+                        {showAccountMenu && (
+                            <div ref={accountMenuRef} className="absolute top-full right-0 mt-2 w-56 bg-white border border-gray-200 rounded-xl shadow-xl z-50 py-2 overflow-hidden">
+                                <div className="px-4 py-2 border-b border-gray-100 mb-1">
+                                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Switch Account</p>
+                                </div>
+                                {accounts.map((acc, idx) => (
+                                    <button 
+                                        key={idx}
+                                        onClick={() => { setActiveAccount(acc); setShowAccountMenu(false); }}
+                                        className="w-full flex items-center gap-3 px-4 py-2 hover:bg-slate-50 transition-colors text-left group"
+                                    >
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0" style={{ background: acc.color }}>
+                                            {acc.name.charAt(0)}
+                                        </div>
+                                        <div className="flex flex-col overflow-hidden">
+                                            <span className={`text-sm font-semibold truncate transition-colors ${activeAccount.email === acc.email ? 'text-sky-600' : 'text-gray-900 group-hover:text-sky-600'}`}>
+                                                {acc.name}
+                                            </span>
+                                            <span className="text-xs text-gray-500 truncate">{acc.email}</span>
+                                        </div>
+                                        {activeAccount.email === acc.email && (
+                                            <svg className="w-4 h-4 text-sky-500 ml-auto flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        )}
+                                    </button>
+                                ))}
+                                <div className="border-t border-gray-100 mt-1 pt-1">
+                                    <button className="w-full text-left px-4 py-2 text-sm font-medium text-gray-600 hover:bg-slate-50 hover:text-gray-900 transition-colors">
+                                        Sign out
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </header>
 
@@ -1928,9 +2397,28 @@ export default function CRMDashboard() {
                                     and enrich profiles with accurate job titles, locations, and
                                     more.
                                 </p>
-                                <button className="inline-flex items-center gap-2 px-3 py-1.5 rounded border border-gray-300 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                                    <GmailIcon />
-                                    Connect Gmail
+                                <button
+                                    onClick={handleConnectGmail}
+                                    disabled={isConnectingGmail || isGmailConnected}
+                                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded border text-xs font-medium transition-colors ${
+                                        isGmailConnected ? "bg-green-50 border-green-200 text-green-700" :
+                                        isConnectingGmail ? "bg-gray-100 border-gray-200 text-gray-500 cursor-wait" :
+                                        "border-gray-300 text-gray-700 hover:bg-gray-50"
+                                    }`}
+                                >
+                                    {isConnectingGmail ? (
+                                        <>
+                                            <div className="w-3 h-3 rounded-full border-2 border-gray-300 border-t-gray-500 animate-spin" />
+                                            Connecting...
+                                        </>
+                                    ) : isGmailConnected ? (
+                                        <>✓ Connected</>
+                                    ) : (
+                                        <>
+                                            <GmailIcon />
+                                            Connect Gmail
+                                        </>
+                                    )}
                                 </button>
                             </div>
                         )}
@@ -1955,7 +2443,10 @@ export default function CRMDashboard() {
 
                         {activeNav === "contacts" ? <ContactsView /> :
                          activeNav === "companies" ? <CompaniesView onAgentStart={handleAgentStart} onAgentResult={handleAgentResult} /> :
-                         activeNav === "prospecting" ? <ProspectingAgentView /> :
+                         activeNav === "deals" ? <PlaceholderView title="Deals Pipeline" desc="Manage your sales pipeline, track deal stages, and forecast revenue." /> :
+                         activeNav === "meetings" ? <PlaceholderView title="Meetings" desc="Schedule, review, and follow up on your upcoming and past meetings." /> :
+                         activeNav === "calls" ? <PlaceholderView title="Calls" desc="Log calls, review call transcripts, and track your outreach." /> :
+                         activeNav === "prospecting" ? <ProspectingAgentView agentResults={agentResults} onProspectAll={handleProspectAll} /> :
                          activeNav === "deal-intel" ? <DealIntelligenceView /> :
                          activeNav === "retention" ? <RevenueRetentionView /> :
                          activeNav === "competitive" ? <CompetitiveIntelligenceView /> :
