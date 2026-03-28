@@ -35,6 +35,15 @@ Connect Gmail, Outlook, or a generic mailto provider from the Settings modal. St
 
 ---
 
+## Database (Included for Testing)
+
+A sample database used for testing and validation is included with this repository. It provides pre-populated CRM data (contacts, companies, deals, and activities) to help you quickly explore features and verify system behavior without needing to create data from scratch.
+
+- The dataset is stored locally and is compatible with the app’s `localStorage`-based persistence.
+- It can be used to simulate real-world CRM workflows, including pipeline tracking and AI agent execution.
+- You can modify, extend, or replace this dataset as needed for custom testing scenarios.
+
+---
 ## Tech Stack
 
 | Layer | Technology |
