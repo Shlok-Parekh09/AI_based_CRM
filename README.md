@@ -1,3 +1,13 @@
+## ⚠️ Security Disclaimer: Email Integration
+
+Please note that the current email functionality required to input my email ID and plaintext password directly into the source code. 
+
+**This is a significant privacy and security risk.** Hardcoding credentials means password could be exposed if this code is accessed by unauthorized users. 
+
+**For your safety:**
+* Do NOT use your primary personal or work email accounts to test this feature.
+* If you need to test the email module, please create and use a disposable "dummy" account.
+* This feature is strictly for local development and is not secure for production environments.
 # CustBuds CRM
 
 An AI-native CRM for modern sales teams — built with React, TypeScript, and a Node.js backend. CustBuds combines a full-featured pipeline manager with autonomous AI agents that research prospects, score fit, write personalized outreach sequences, and monitor deal health in real time.
